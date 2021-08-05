@@ -1,7 +1,7 @@
 # piSTAR Landia
 
 ## Overview
-A 2d game framework designed to provide playground for AI (Reinforcement Learning) agents. Humans are also welcome. 
+A 2d game framework designed to provide playground for AI (Reinforcement Learning) agents. Humans are also welcome.
 
 **Version: 0.0.1-dev**: Early release not ready for general use. Only tested on Ubuntu and Windows 10.
 
@@ -14,19 +14,22 @@ A 2d game framework designed to provide playground for AI (Reinforcement Learnin
 <br/>
 <br/>
 
+## Vision
+A fun environment where humans can train and interact with AI agents.
+
 ## Features
-- Multi Agent Support
-- Openai gym interface for Single Agent Play
-- Network Play support (Early Development)
-- Crafting Support
-- Support for concurrent modes (eg: Tag + Survival)
+- Multi-agent support
+- Openai gym interface for pingle agent play
+- Network play support (early development)
+- Crafting support
+- Support for concurrent  game modes (eg: Tag + Survival)
 - Written in Python and requires only a few dependencies.
 - Highly configurable and hackable. Easily add new game modes, objects or maps.
-- Included Game Modes:
+- Game Modes included:
     - Survival (collect food or die, avoid monsters)
     - Tag
     - Infection Tag
-- Good Performance and low memory footprint with room for improvement.
+- Reasonable performance and low memory footprint with plenty of room for future improvements.
 
 ### Planned Features
 - Game Modes
@@ -50,6 +53,7 @@ A 2d game framework designed to provide playground for AI (Reinforcement Learnin
 - Async agent play i.e. environment doesn't block when waiting for action form agent
 - Better HUD
 - Ingame menus
+- Support of Large number of concurrent agents and human players
 
 ## Known Issues
 - No argument to set the game seed
@@ -65,7 +69,8 @@ Test below are for 1 agent @ 84x84 on an i7 Laptop
  - small maps 2500+ FPS
  - large maps 800+ FPS
 
-Full resolution human players can expect several hundred FPSaaa## Requirements
+Full resolution human players can expect several hundred FPS
+## Requirements
 - python 3.7 or newer installed
 - pygame (rendering)
 - l4z (network compression)
@@ -120,7 +125,7 @@ TODO: More documentation
 
 ## Acknowledgments
 
-- My wife and kids for their inspiration and help testing
+- My kids for their inspiration and help testing
 - Vryell's Tiny Adventure Pack. Currently used for most of the game art
     - See: https://vryell.itch.io/tiny-adventure-pack
 
