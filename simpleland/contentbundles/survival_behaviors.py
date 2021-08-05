@@ -1,5 +1,6 @@
 
 from random import random
+from simpleland import game
 from ..common import Vector2
 from .survival_utils import normalize_angle, normalized_direction
 from .. import gamectx
@@ -9,20 +10,34 @@ from ..clock import clock
 import random
 
 class FollowAnimals(Behavior):
+
+
+    def __init__(self):
+        
+        self.following_obj = None
+        
+        self.last_check = 0
+        self.check_freq = 10 * gamectx.content.step_duration()
     
     def on_update(self,obj:AnimateObject):
-        for obj2 in obj.get_visible_objects():
-            if obj.config_id != obj2.config_id and 'animal' in obj2.get_types():
-                orig_direction: Vector2 = obj2.get_position() - obj.get_position()
-                direction = normalized_direction(orig_direction)
-                new_angle = normalize_angle(Vector2(0, 1).angle_to(direction))
-                mag = orig_direction.magnitude()
-                if mag <= gamectx.content.tile_size:
-                    direction = Vector2(0, 0)
-                if mag <= gamectx.content.tile_size and new_angle == obj.angle:
-                    obj.use()
-                else:
-                    obj.walk(direction, new_angle)
+        if self.following_obj is None or (clock.get_ticks() - self.last_check) > self.check_freq:
+            for obj2 in obj.get_visible_objects():
+                if obj.config_id != obj2.config_id and 'animal' in obj2.get_types():
+                    self.following_obj = obj2
+            self.last_check = clock.get_ticks()
+
+        if self.following_obj is not None:
+            orig_direction: Vector2 = self.following_obj.get_position() - obj.get_position()
+            direction = normalized_direction(orig_direction)
+            new_angle = normalize_angle(Vector2(0, 1).angle_to(direction))
+            mag = orig_direction.magnitude()
+            if mag <= gamectx.content.tile_size:
+                direction = Vector2(0, 0)
+            if mag <= gamectx.content.tile_size and new_angle == obj.angle:
+                obj.use()
+            else:
+                obj.walk(direction, new_angle)
+
 
 class FleeAnimals(Behavior):
     

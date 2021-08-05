@@ -1,45 +1,42 @@
 # SimpleLand
 
-## TODO:
-Better design would be:
-- create references for objects during serialization and reassign during deserialization.
-- only send updated data
-- use event listners
-- object event listender
-
 ## Overview
-A 2d game engine written in python designed to provide a flexilble test-bed for **reinforcement learning** research.
+A 2d game framework designed to provide playground for reinforcement learning agents. Humans can play too.
 
-**Version: 0.0.1-dev**: Early release not ready for general use. 
+**Version: 0.0.1-dev**: Early release not ready for general use.
 
-![Game Screenshot](xxx "Game screenshot")
+## Screen Shots
+<img src="docs/screen_shot0.png" alt="drawing" width="400"/>
+<br/>
+<br/>
+
+<img src="docs/screen_shot_zoomout1.png" alt="drawing" width="400"/>
+<br/>
+<br/>
 
 ## Features
-- Openai gym interface for Single Agent Play
 - Multi Agent Support
-- Configuration driven
-- Reasonably good FPS for software rendering
-- 3rd person perspective view
-- Game Modes Available
+- Openai gym interface for Single Agent Play
+- Network Play support (Early Development)
+- Crafting Support
+- Support for concurrent modes (eg: Tag + Survival)
+- Written in Python and requires only a few dependencies.
+- Highly configurable and hackable. Easily add new game modes, objects or maps.
+- Included Game Modes:
     - Survival (collect food or die, avoid monsters)
     - Tag
     - Infection Tag
-- Network Play support (Early Development)
-- Crafting Support
-- Support for concurrent games
-- Hackable, easy to add:
-    - game object types
-    - game modes
-    - maps
+- Good Performance and low memory footprint with room for improvement.
 
 ### Planned Features
 - Game Modes
-    - Tag
-    - Infection Tag
     - Survival with Crafting/Hunting
-    - Random Mazes
+    - Random Mazes/Terrian
     - Multi Task Obstatcle courses
-    - Block moving puzzles   
+    - Block moving puzzles
+    - Physics puzzles
+    - Crafting tasks
+- More observation modes
 - 1st person perspective view
 - 2d physics support
 - Admin UI for dynamic world changes
@@ -50,16 +47,20 @@ A 2d game engine written in python designed to provide a flexilble test-bed for 
 - Better HUD
 - Ingame menus
 
-### Performance
-When tested on i7 laptop
-- 300+ RGB frame observations per second
-- Small memory footprint. Less than 1MB per instance
-
 ## Known Issues
 - Network play does not scale well.
 - Incomplete documentation and testing
 - Network play uses more bandwidth than needed.
+- No runtime full game reset
 
+## Performance
+There are many factors that can impact FPS, including map size, number of game objects, resolution, number of agents.
+
+Test below are for 1 agent @ 84x84 on an i7 Laptop
+ - small maps 2500+ FPS
+ - large maps 800+ FPS
+
+Full resolution human players can expect several hundred FPS
 ## Requirements
 - python 3.7
 - pygame (rendering)
@@ -82,7 +83,13 @@ When tested on i7 laptop
 
 ### Run Random Agent Test
 ```bash
-PYTHONPATH=${PYTHONPATH}:./  python simpleland/env.py  --agent_count=2 --mem_profile --max_steps=800000
+PYTHONPATH=${PYTHONPATH}:./  python simpleland/env.py  --agent_count=2 --max_steps=800000
+```
+
+### Local Game only (Human play)
+
+```bash
+PYTHONPATH=${PYTHONPATH}:./  python simpleland/runner.py
 ```
 
 ### Run Server and Local Client (Human play)
@@ -98,5 +105,9 @@ PYTHONPATH=${PYTHONPATH}:./  python simpleland/runner.py --enable_server --enabl
 
 ### Using the Reinforcement learning Env interfaces
 
-TODO: See simpleland/env.py
+
+MultiAgent and Gym RL interfaces are here:
+[env.py]( simpleland/env.py)
+
+TODO: Document
 

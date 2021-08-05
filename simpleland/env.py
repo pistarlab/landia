@@ -40,6 +40,7 @@ class SimplelandEnv:
             player_type = 1,
             include_state_observation = False,
             remote_client=False,
+            render_to_screen = False,
             content_overrides = {}):
         
         game_def = get_game_def(
@@ -79,6 +80,7 @@ class SimplelandEnv:
                 resolution = resolution,
                 fps=tick_rate,
                 render_shapes=render_shapes,
+                render_to_screen=render_to_screen,
                 player_type=player_type,
                 is_human=False,
                 view_type=view_type,
@@ -268,13 +270,19 @@ if __name__ == "__main__":
     parser.add_argument("--verbose",action="store_true")
     parser.add_argument("--remote_client",action="store_true")
     parser.add_argument("--tick_rate", default=0, type=int)
+    parser.add_argument("--resolution", default="42x42", type=str)
     parser.add_argument("--log_level",default="info",help=", ".join(list(LOG_LEVELS.keys())),type=str)
 
     args =  parser.parse_args()
 
+    
+
     logging.getLogger().setLevel(LOG_LEVELS.get(args.log_level))
 
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+
+    res_string = args.resolution.split("x")
+    resolution = (int(res_string[0]), int(res_string[1]))
     
     agent_map = {str(i):{} for i in range(args.agent_count)}
     verbose = args.verbose
@@ -288,7 +296,9 @@ if __name__ == "__main__":
     env = SimplelandEnv(
         agent_map=agent_map,
         remote_client=args.remote_client,
+        resolution = resolution,
         dry_run=False,
+        render_to_screen=render,
         tick_rate=args.tick_rate)
 
     done_agents = set()

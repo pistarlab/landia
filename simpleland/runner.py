@@ -74,6 +74,7 @@ def get_player_def(
         show_console = True,
         enable_resize=False,
         include_state_observation = False,
+        render_to_screen=True,
         disable_hud = False) -> PlayerDefinition:
     player_def = PlayerDefinition()
 
@@ -97,6 +98,7 @@ def get_player_def(
     player_def.renderer_config.sound_enabled =sound_enabled
     player_def.renderer_config.show_console =show_console
     player_def.renderer_config.enable_resize = enable_resize
+    player_def.renderer_config.render_to_screen = render_to_screen
     player_def.renderer_config.disable_hud = disable_hud
     return player_def
 

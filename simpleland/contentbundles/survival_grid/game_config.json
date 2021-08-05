@@ -52,7 +52,7 @@
 
                 "obj": "rock1"},
             "static_layers": [
-                "map_layer_1.txt"
+                "map_9x9_vwall.txt"
             ],
             "index": {
                 "s0": {
