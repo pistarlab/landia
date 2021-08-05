@@ -1,0 +1,21 @@
+{
+    "health_start": 100,
+    "health_gen": 1,
+    "health_max": 100,
+    "health_gen_period": 10,
+    "stamina_max": 100,
+    "stamina_gen": 20,
+    "stamina_gen_period": 1,
+    "energy_start": 100,
+    "energy_max": 100,
+    "energy_decay_period": 0,
+    "energy_decay": 0,
+    "low_energy_health_penalty": 0,
+    "strength": 1,
+    "inventory_size": 1,
+    "walk_speed": 0.2,
+    "attack_speed": 0.2,
+    "vision_radius": 4,
+    "drop_on_death":{"cooked_meat1":1}
+
+}

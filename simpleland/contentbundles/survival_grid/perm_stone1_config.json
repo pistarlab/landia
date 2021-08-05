@@ -1,0 +1,11 @@
+{
+    "collectable": false,
+    "pushable": true,
+    "count_max": 1,
+    "permanent": true,
+    "health":100,
+    "remove_on_destroy":true,
+    "collision_type":1,
+    "count":1,
+    "default_action": "idle"
+}

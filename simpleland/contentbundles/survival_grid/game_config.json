@@ -1,0 +1,193 @@
+{
+    "game_id": "survival_grid",
+    "tile_size": 16,
+    "asset_bundle": "asset_bundle.json",
+    "start_map": "main",
+    "step_duration_factor" : 0.2,
+    "player_types": {
+        "1": {
+            "default_camera_distance": 160,
+            "config_id": "human1"
+        }
+    },
+    "active_controllers":["pspawn","foodcollect","objcollision"],
+    "controllers":{
+        "pspawn":{
+            "class":"PlayerSpawnController",
+            "config":{
+
+            }
+
+        },
+        "foodcollect":{
+            "class":"FoodCollectController",
+            "config":{
+
+            }
+        },
+        "objcollision":{
+            "class":"ObjectCollisionController",
+            "config":{
+
+            }
+        },
+        "tag1":{
+            "class":"TagController",
+            "config":{
+
+            }
+        },
+        "infect1":{
+            "class":"InfectionController",
+            "config":{
+
+            }
+        }
+    },
+    "tag_list":["tagged","playingtag","food_collect","playinginfection","infected"],
+    "maps": {
+        "main": {
+            "format": "txt",
+            "boundary": {
+
+                "obj": "rock1"},
+            "static_layers": [
+                "map_layer_1.txt"
+            ],
+            "index": {
+                "s0": {
+                    "type": "spawn_point",
+                    "obj": "human1"
+                },
+                "m0": {
+                    "type": "spawn_point",
+                    "obj": "monster1"
+                },
+                "s1": {
+                    "type": "obj",
+                    "obj": "human1"
+                },
+                "m1": {
+                    "type": "obj",
+                    "obj": "monster1"
+                },
+                "f1": {
+                    "type": "obj",
+                    "obj": "apple1"
+                },
+                "f2": {
+                    "type": "obj",
+                    "obj": "cooked_meat1"
+                },
+                "t1": {
+                    "type": "obj",
+                    "obj": "tree1"
+                },
+                "w1": {
+                    "type": "obj",
+                    "obj": "water1"
+                },
+                "d1": {
+                    "type": "obj",
+                    "obj": "deer1"
+                },
+                "r1": {
+                    "type": "obj",
+                    "obj": "rock1"
+                },
+                "r2": {
+                    "type": "obj",
+                    "obj": "perm_stone1"
+                },
+                "ww": {
+                    "type": "obj",
+                    "obj": "wall1"
+                }
+            }
+        }
+    },
+
+    "effects": {
+        "blue":{
+        }
+    },
+    "tag_effect_map":{
+        "infected":"blue"
+    },
+    "objects": {
+        "human1": {
+            "class": "Human",
+            "obs_id":0,
+            "config": {
+                "disabled_actions":[],
+                "show_info_bar":true,
+                "start_inventory":{"wall1":4},
+                "craft_items": [
+                    "wall1", "human1", "tree1"
+                ]
+            }
+        },
+        "monster1": {
+            "class": "Monster",
+            "config": {
+                "show_info_bar":true
+            }
+        },
+        "apple1": {
+            "class": "Food"
+        },
+        "cooked_meat1": {
+            "class": "Food"
+        },
+        "tree1": {
+            "class": "Tree",
+            "config":{
+                "collectable": true,
+                "pushable": false,
+                "count_max": 10,
+                "permanent": false,
+                "health":100,
+                "remove_on_destroy":true,
+                "collision_type":1,
+                "count":1,
+                "default_action": "idle"
+            }
+        },
+        "water1": {
+            "class": "Liquid"
+        },
+        "deer1": {
+            "class": "Animal"
+        },
+        "rock1": {
+            "class": "Rock",
+            "config":{
+                "collectable": true,
+                "pushable": false,
+                "count_max": 10,
+                "permanent": true,
+                "health":100,
+                "remove_on_destroy":true,
+                "collision_type":1,
+                "count":1,
+                "default_action": "idle"
+            },
+            "model": { 
+                "default": ["rock"]
+               }
+        },
+        "perm_stone1": {
+            "class": "Rock"
+        },
+        "tag_tool": {
+            "class": "TagTool"
+        },
+        "wood1": {
+            "class": "PhysicalObject"
+        },
+        "wall1": {
+            "class": "PhysicalObject",
+            "config":{"craft_requirements": {"wood1":1}}
+        }
+    }
+}

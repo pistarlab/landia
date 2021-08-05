@@ -1,0 +1,73 @@
+{
+    "default": [
+        "skel_idle_down_1"
+    ],
+    "idle": {
+        "down": [
+            "skel_idle_down_1",
+            "skel_idle_down_2",
+            "skel_idle_down_3",
+            "skel_idle_down_4",
+            "skel_idle_down_5",
+            "skel_idle_down_6"
+        ],
+        "up": [
+            "skel_idle_up_1",
+            "skel_idle_up_2",
+            "skel_idle_up_3",
+            "skel_idle_up_4",
+            "skel_idle_up_5",
+            "skel_idle_up_6"
+        ],
+        "left": [
+            "skel_idle_left_1",
+            "skel_idle_left_2",
+            "skel_idle_left_3",
+            "skel_idle_left_4",
+            "skel_idle_left_5",
+            "skel_idle_left_6"
+        ],
+        "right": [
+            "skel_idle_right_1",
+            "skel_idle_right_2",
+            "skel_idle_right_3",
+            "skel_idle_right_4",
+            "skel_idle_right_5",
+            "skel_idle_right_6"
+        ]
+    },
+    "walk": {
+        "down": [
+            "skel_walk_down_1",
+            "skel_walk_down_2",
+            "skel_walk_down_3",
+            "skel_walk_down_4",
+            "skel_walk_down_5",
+            "skel_walk_down_6"
+        ],
+        "up": [
+            "skel_walk_up_1",
+            "skel_walk_up_2",
+            "skel_walk_up_3",
+            "skel_walk_up_4",
+            "skel_walk_up_5",
+            "skel_walk_up_6"
+        ],
+        "left": [
+            "skel_walk_left_1",
+            "skel_walk_left_2",
+            "skel_walk_left_3",
+            "skel_walk_left_4",
+            "skel_walk_left_5",
+            "skel_walk_left_6"
+        ],
+        "right": [
+            "skel_walk_right_1",
+            "skel_walk_right_2",
+            "skel_walk_right_3",
+            "skel_walk_right_4",
+            "skel_walk_right_5",
+            "skel_walk_right_6"
+        ]
+    }
+}

@@ -1,0 +1,107 @@
+{
+    "default": [
+        "player_idle_down_1"
+    ],
+    "idle": {
+        "down": [
+            "player_idle_down_1",
+            "player_idle_down_2",
+            "player_idle_down_3",
+            "player_idle_down_4",
+            "player_idle_down_5",
+            "player_idle_down_6"
+        ],
+        "up": [
+            "player_idle_up_1",
+            "player_idle_up_2",
+            "player_idle_up_3",
+            "player_idle_up_4",
+            "player_idle_up_5",
+            "player_idle_up_6"
+        ],
+        "left": [
+            "player_idle_left_1",
+            "player_idle_left_2",
+            "player_idle_left_3",
+            "player_idle_left_4",
+            "player_idle_left_5",
+            "player_idle_left_6"
+        ],
+        "right": [
+            "player_idle_right_1",
+            "player_idle_right_2",
+            "player_idle_right_3",
+            "player_idle_right_4",
+            "player_idle_right_5",
+            "player_idle_right_6"
+        ]
+    },
+    "walk": {
+        "down": [
+            "player_walk_down_1",
+            "player_walk_down_2",
+            "player_walk_down_3",
+            "player_walk_down_4",
+            "player_walk_down_5",
+            "player_walk_down_6"
+        ],
+        "up": [
+            "player_walk_up_1",
+            "player_walk_up_2",
+            "player_walk_up_3",
+            "player_walk_up_4",
+            "player_walk_up_5",
+            "player_walk_up_6"
+        ],
+        "left": [
+            "player_walk_left_1",
+            "player_walk_left_2",
+            "player_walk_left_3",
+            "player_walk_left_4",
+            "player_walk_left_5",
+            "player_walk_left_6"
+        ],
+        "right": [
+            "player_walk_right_1",
+            "player_walk_right_2",
+            "player_walk_right_3",
+            "player_walk_right_4",
+            "player_walk_right_5",
+            "player_walk_right_6"
+        ]
+    },
+    "attack": {
+        "down": [
+            "player_atk_down_1",
+            "player_atk_down_2",
+            "player_atk_down_3",
+            "player_atk_down_4",
+            "player_atk_down_5",
+            "player_atk_down_6"
+        ],
+        "up": [
+            "player_atk_up_1",
+            "player_atk_up_2",
+            "player_atk_up_3",
+            "player_atk_up_4",
+            "player_atk_up_5",
+            "player_atk_up_6"
+        ],
+        "left": [
+            "player_atk_left_1",
+            "player_atk_left_2",
+            "player_atk_left_3",
+            "player_atk_left_4",
+            "player_atk_left_5",
+            "player_atk_left_6"
+        ],
+        "right": [
+            "player_atk_right_1",
+            "player_atk_right_2",
+            "player_atk_right_3",
+            "player_atk_right_4",
+            "player_atk_right_5",
+            "player_atk_right_6"
+        ]
+    }
+}

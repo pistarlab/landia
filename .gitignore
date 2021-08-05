@@ -1,0 +1,39 @@
+.idea
+.DS_Store
+.sqlite3
+.vscode
+
+
+# Editor directories and files
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# misc
+*~
+*.bak
+*.map
+*.swp
+.DS_Store
+.log/
+\#*#
+.#*
+
+# Build
+.cache
+*.py[co]
+.pytest_cache
+__pycache__
+*.egg-info
+.ipynb_checkpoints
+pip-wheel-metadata
+build
+dist
+MANIFEST
+
+/.pytest_cache
+/.coverage
+/.tox
+/venv*
