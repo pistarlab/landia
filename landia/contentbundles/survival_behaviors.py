@@ -1,6 +1,6 @@
 
 from random import random
-from simpleland import game
+from landia import game
 from ..common import Vector2
 from .survival_utils import normalize_angle, normalized_direction
 from .. import gamectx

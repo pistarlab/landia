@@ -9,19 +9,19 @@ import threading
 
 import lz4.frame
 from pyinstrument import Profiler
-from simpleland.client import GameClient
+from landia.client import GameClient
 
-from simpleland.config import GameDef, PlayerDefinition, ServerConfig
-from simpleland.content import Content
-from simpleland.common import StateDecoder, StateEncoder
+from landia.config import GameDef, PlayerDefinition, ServerConfig
+from landia.content import Content
+from landia.common import StateDecoder, StateEncoder
 
 
-from simpleland.registry import load_game_content, load_game_def
-from simpleland.renderer import Renderer
-from simpleland.utils import gen_id
+from landia.registry import load_game_content, load_game_def
+from landia.renderer import Renderer
+from landia.utils import gen_id
 import traceback
-from simpleland import gamectx
-from simpleland.server import GameUDPServer, UDPHandler 
+from landia import gamectx
+from landia.server import GameUDPServer, UDPHandler 
 import signal
 import sys
 
@@ -140,6 +140,10 @@ def get_arguments(override_args=None):
     return  parser.parse_args(override_args)
 
 
+def main():
+    args = get_arguments()
+    run(args)
+    
 def run(args):
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
     
@@ -250,8 +254,7 @@ def run(args):
         graceful_exit()
 
 if __name__ == "__main__":
-    args = get_arguments()
-    run(args)
+    main()
 
     
 

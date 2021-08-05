@@ -1,5 +1,5 @@
 
-from simpleland.object import GObject
+from landia.object import GObject
 from typing import Any, Dict, List
 from .utils import gen_id
 from .common import Base, Vector2

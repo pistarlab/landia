@@ -1,7 +1,7 @@
 import math
-from simpleland.contentbundles.survival_config import CONTENT_ID
-from simpleland.contentbundles.survival_behaviors import FleeAnimals, FollowAnimals, PlayingTag
-from simpleland import physics_engine
+from landia.contentbundles.survival_config import CONTENT_ID
+from landia.contentbundles.survival_behaviors import FleeAnimals, FollowAnimals, PlayingTag
+from landia import physics_engine
 import random
 from collections import defaultdict
 from typing import Dict, Any, Tuple

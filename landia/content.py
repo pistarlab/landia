@@ -1,5 +1,5 @@
-from simpleland.event import InputEvent
-from simpleland.object import GObject
+from landia.event import InputEvent
+from landia.object import GObject
 from .player import Player
 from .asset_bundle import AssetBundle
 from abc import abstractmethod

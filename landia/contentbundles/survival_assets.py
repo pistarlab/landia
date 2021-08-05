@@ -1,4 +1,4 @@
-from simpleland.contentbundles.survival_common import StateController
+from landia.contentbundles.survival_common import StateController
 from ..asset_bundle import AssetBundle
 import math
 import random

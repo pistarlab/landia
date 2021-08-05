@@ -1,5 +1,5 @@
 
-from simpleland import camera
+from landia import camera
 from ..config import GameDef
 from ..utils import merged_dict
 import pkg_resources

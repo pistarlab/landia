@@ -1,4 +1,4 @@
-from simpleland.utils import TickPerSecCounter
+from landia.utils import TickPerSecCounter
 from typing import Dict, Any
 
 import pygame

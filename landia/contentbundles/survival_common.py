@@ -1,5 +1,5 @@
 from abc import abstractclassmethod, abstractmethod
-from simpleland.player import Player
+from landia.player import Player
 from typing import Dict, List, Any
 from ..common import Base
 from ..clock import clock

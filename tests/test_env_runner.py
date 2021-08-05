@@ -1,13 +1,13 @@
 import pytest
-from simpleland.env import SimplelandEnv
+from landia.env import LandiaEnv
 import time
-from simpleland.clock import clock
+from landia.clock import clock
 
 
 def test_env():
     agent_map = {str(i):{} for i in range(1)}
     debug = False
-    env = SimplelandEnv(agent_map=agent_map,dry_run=False)
+    env = LandiaEnv(agent_map=agent_map,dry_run=False)
     start_time = time.time()
     max_steps = 2000
 

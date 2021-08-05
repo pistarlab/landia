@@ -3,7 +3,7 @@ from typing import List, Dict
 from .event import (Event, ViewEvent,InputEvent,AdminCommandEvent)
 
 from .common import Vector2
-from simpleland.player import Player
+from landia.player import Player
 
 def get_default_key_map():
     key_map = {}

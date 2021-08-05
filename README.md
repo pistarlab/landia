@@ -1,9 +1,9 @@
-# SimpleLand
+# piSTAR Landia
 
 ## Overview
-A 2d game framework designed to provide playground for reinforcement learning agents. Humans can play too.
+A 2d game framework designed to provide playground for AI (Reinforcement Learning) agents. Humans are also welcome. 
 
-**Version: 0.0.1-dev**: Early release not ready for general use.
+**Version: 0.0.1-dev**: Early release not ready for general use. Only tested on Ubuntu and Windows 10.
 
 ## Screen Shots
 <img src="docs/screen_shot0.png" alt="drawing" width="400"/>
@@ -32,13 +32,17 @@ A 2d game framework designed to provide playground for reinforcement learning ag
 - Game Modes
     - Survival with Crafting/Hunting
     - Random Mazes/Terrian
-    - Multi Task Obstatcle courses
+    - Obstatcle courses which include solving multiple tasks
     - Block moving puzzles
     - Physics puzzles
     - Crafting tasks
-- More observation modes
-- 1st person perspective view
+    - Racing 
+    - Soccer
+    - Boardgames - checkers, chess
+- Loading of external configuration and game code at load/runtime
 - 2d physics support
+- Observation types beyond RGB
+- 1st person perspective view
 - Admin UI for dynamic world changes
 - World state saving
 - Support for concurrent RL agent and human players
@@ -48,21 +52,21 @@ A 2d game framework designed to provide playground for reinforcement learning ag
 - Ingame menus
 
 ## Known Issues
+- No argument to set the game seed
 - Network play does not scale well.
 - Incomplete documentation and testing
 - Network play uses more bandwidth than needed.
 - No runtime full game reset
 
 ## Performance
-There are many factors that can impact FPS, including map size, number of game objects, resolution, number of agents.
+There are many factors that can impact FPS including: map size, number of game objects, resolution, number of agents, and game logic.
 
 Test below are for 1 agent @ 84x84 on an i7 Laptop
  - small maps 2500+ FPS
  - large maps 800+ FPS
 
-Full resolution human players can expect several hundred FPS
-## Requirements
-- python 3.7
+Full resolution human players can expect several hundred FPSaaa## Requirements
+- python 3.7 or newer installed
 - pygame (rendering)
 - l4z (network compression)
 - pyinstrument (performance profiling)
@@ -70,44 +74,53 @@ Full resolution human players can expect several hundred FPS
 
 ## Installation
 
-1. Make sure python 3.7 is installed
-1. Download Repo:  ```git clone https://github.com/pistarlab/simpleland```
-1. enter repo directory: ```cd simpleland```
-1. (Optional) if using Anaconda, create conda environment: ```conda create -n simpleland python=3.7```
+1. Make sure python 3.7 or newer is installed
+1. Download Repo:  ```git clone https://github.com/pistarlab/landia```
+1. enter repo directory: ```cd landia```
+1. (Optional) if using Anaconda, create conda environment: ```conda create -n landia```
 1. Install requirements via pip: ```pip install -e .```
-1. Update path: ```export PYTHONPATH=${PYTHONPATH}:./```
 
 
 ## Usage
 
-
-### Run Random Agent Test
-```bash
-PYTHONPATH=${PYTHONPATH}:./  python simpleland/env.py  --agent_count=2 --max_steps=800000
-```
-
 ### Local Game only (Human play)
 
 ```bash
-PYTHONPATH=${PYTHONPATH}:./  python simpleland/runner.py
+landia
 ```
 
 ### Run Server and Local Client (Human play)
 
 ```bash
-PYTHONPATH=${PYTHONPATH}:./  python simpleland/runner.py --enable_server --enable_client
+landia --enable_server --enable_client
 ```
 
 ### Connect to remote host
 ```bash
- python simpleland/runner.py --enable_client --remote_client --hostname=SERVER_HOSTNAME 
+landia --enable_client --remote_client --hostname=SERVER_HOSTNAME 
+```
+### Run Random Agent Test
+```bash
+landia_test_env --agent_count=2 --max_steps=800000
 ```
 
-### Using the Reinforcement learning Env interfaces
+***NOTE: For manual execution from repository you can use the following command***
+```bash
+PYTHONPATH=${PYTHONPATH}:./  python landia/runner.py
+```
 
+## RL Development
+
+###  Using the Reinforcement learning Env interfaces
 
 MultiAgent and Gym RL interfaces are here:
-[env.py]( simpleland/env.py)
+[env.py]( landia/env.py)
 
-TODO: Document
+TODO: More documentation
+
+## Acknowledgments
+
+- My wife and kids for their inspiration and help testing
+- Vryell's Tiny Adventure Pack. Currently used for most of the game art
+    - See: https://vryell.itch.io/tiny-adventure-pack
 

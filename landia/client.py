@@ -15,8 +15,6 @@ from typing import List
 from typing import Tuple
 
 import lz4.frame
-import numpy as np
-from pyinstrument import Profiler
 
 from .common import (TimeLoggingContainer)
 from .camera import Camera

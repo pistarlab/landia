@@ -8,10 +8,10 @@ import threading
 
 import lz4.frame
 
-from simpleland.config import  ServerConfig
-from simpleland.common import StateDecoder, StateEncoder
+from landia.config import  ServerConfig
+from landia.common import StateDecoder, StateEncoder
 
-from simpleland import gamectx
+from landia import gamectx
 from .clock import clock
 
 class UDPHandler(socketserver.BaseRequestHandler):
