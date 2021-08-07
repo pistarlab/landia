@@ -39,8 +39,14 @@ class GameMap:
 
     def __init__(self, paths, map_config, tile_size=16, seed=123):
 
-        self.seed = seed        
-        full_paths =[pkg_resources.resource_filename(__name__, path) for path in paths]
+        self.seed = seed
+        full_paths = []
+        for path in paths:
+            if path.startswith("/")        :
+                full_path = path
+            else:
+                full_path = pkg_resources.resource_filename(__name__, path)
+            full_paths.append(full_path)
         self.static_layers = []
         static_layer_paths = {}
 
