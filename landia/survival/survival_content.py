@@ -1,43 +1,35 @@
-import math
-from landia.contentbundles.survival_config import CONTENT_ID
-from landia.contentbundles.survival_behaviors import FleeAnimals, FollowAnimals, PlayingTag
-from landia import physics_engine
-import random
-from collections import defaultdict
-from typing import Dict, Any, Tuple
-
-from ..camera import Camera
-from ..event import (AdminCommandEvent, DelayedEvent, Event, InputEvent, ObjectEvent,ViewEvent,
-                     PeriodicEvent, PositionChangeEvent, SoundEvent)
-from ..object import GObject
-
-from ..player import Player
-from ..renderer import Renderer
-from ..utils import gen_id, getsize, getsizewl
-
-from ..asset_bundle import AssetBundle
-from ..common import COLLISION_TYPE
-import numpy as np
-from ..clock import clock
-from typing import List,Dict,Any
-from ..event import InputEvent, Event, DelayedEvent
-from .. import gamectx
-from ..common import  Vector2, get_base_cls_by_name
-import pygame
-from ..clock import clock
-from gym import spaces
-import sys
-import math
-
-import pkg_resources
 import json
+import math
 import os
-from .survival_assets import load_asset_bundle
-from .survival_map import GameMap
-from .survival_controllers import FoodCollectController,ObjectCollisionController, PlayerSpawnController, TagController,InfectionController
-from .survival_objects import *
-from .survival_utils import int_map_to_onehot_map,ints_to_multi_hot, vec_to_coord
+import random
+import sys
 import time
+from typing import Any, Dict, List, Tuple
+
+import numpy as np
+from gym import spaces
+from landia import gamectx
+from landia.camera import Camera
+from landia.clock import clock
+from landia.common import COLLISION_TYPE, Vector2, get_base_cls_by_name
+from landia.event import (AdminCommandEvent, DelayedEvent, Event, InputEvent,
+                          ObjectEvent, PeriodicEvent, PositionChangeEvent,
+                          SoundEvent, ViewEvent)
+from landia.object import GObject
+from landia.player import Player
+from landia.renderer import Renderer
+from landia.utils import gen_id, getsize, getsizewl
+
+from .survival_assets import load_asset_bundle
+from .survival_behaviors import FleeAnimals, FollowAnimals, PlayingTag
+from .survival_controllers import (FoodCollectController, InfectionController,
+                                   ObjectCollisionController,
+                                   PlayerSpawnController, TagController)
+from .survival_map import GameMap
+from .survival_objects import *
+from .survival_utils import (int_map_to_onehot_map, ints_to_multi_hot,
+                             vec_to_coord)
+
 
 ############################
 # COLLISION HANDLING
@@ -76,7 +68,7 @@ class GameContent(SurvivalContent):
 
         self.loaded = False
         self.gamemap = GameMap(
-            path = self.config.get("game_config_root"),
+            paths = [self.config.get("game_config_root"),self.config.get("mod_path")],
             map_config=self.map_config,
             tile_size = self.tile_size,
             seed = self.config.get("map_seed",123))
@@ -340,6 +332,14 @@ class GameContent(SurvivalContent):
                 config_id = command_parts[1]
                 obj = self.create_object_from_config_id(config_id)
                 obj.spawn(spawn_pos)
+        elif value.startswith("run"):
+            command_parts = value.split(" ")
+            script_name = command_parts[1]
+            try:
+                exec(open(os.path.join(self.config.get("mod_path"),script_name)).read())
+            except Exception as e:
+                self.log_console(f"Error running script: {e}")
+
         elif value.startswith("controller"):
             command_parts = value.split(" ")
             action =command_parts[1]
@@ -357,8 +357,9 @@ class GameContent(SurvivalContent):
                 obj.spawn(spawn_pos)
         else:
             error_message = "Invalid or unknown"
-        
-        self.log_console(f"Command failed :\"{value}\"  Message:{error_message}")
+
+        if error_message is not None:
+            self.log_console(f"Command failed :\"{value}\"  Message:{error_message}")
 
         events = []
         return events

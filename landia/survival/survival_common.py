@@ -1,9 +1,9 @@
 from abc import abstractclassmethod, abstractmethod
 from landia.player import Player
 from typing import Dict, List, Any
-from ..common import Base
-from ..clock import clock
-from ..content import Content
+from landia.common import Base
+from landia.clock import clock
+from landia.content import Content
 
 
 class SurvivalContent(Content):

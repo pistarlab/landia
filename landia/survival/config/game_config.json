@@ -1,5 +1,5 @@
 {
-    "game_id": "survival_grid",
+    "game_id": "survival",
     "tile_size": 16,
     "asset_bundle": "asset_bundle.json",
     "start_map": "main",
@@ -48,6 +48,7 @@
     "maps": {
         "main": {
             "format": "txt",
+            "path": "config",
             "boundary": {
 
                 "obj": "rock1"},

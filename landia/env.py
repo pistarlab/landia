@@ -27,7 +27,7 @@ class LandiaEnv:
 
     def __init__(self,
                  resolution=(42, 42),
-                 game_id="survival_grid",
+                 game_id="survival",
                  hostname='localhost',
                  port=10001,
                  dry_run=False,

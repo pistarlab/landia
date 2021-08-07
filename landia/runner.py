@@ -134,7 +134,7 @@ def get_arguments(override_args=None):
     parser.add_argument("--enable_profiler", action="store_true", help="Enable Performance profiler")
     parser.add_argument("--tick_rate", default=60, type=int, help="tick_rate")
 
-    parser.add_argument("--game_id", default="survival_grid", help="id of game")
+    parser.add_argument("--game_id", default="survival", help="id of game")
     parser.add_argument("--content_overrides", default="{}", type=str,help="JSON string containing content updates. eg --content_overrides='{\"player_start_energy\":35}'")
     parser.add_argument("--log_level",default="info",help=", ".join(list(LOG_LEVELS.keys())),type=str)
     return  parser.parse_args(override_args)

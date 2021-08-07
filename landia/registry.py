@@ -1,6 +1,6 @@
 from .config import  GameDef
 
-from .contentbundles import survival_grid, survival_config
+from .survival import survival_content, survival_config
 from .content import Content
 
 # Init Registries
@@ -23,7 +23,7 @@ def load_game_content(game_def:GameDef) -> Content:
 # TODO: scan for game_defs and load from entrypoint in game_def
 # Content
 
-content_classes['survival_grid'] = survival_grid.GameContent
+content_classes['survival'] = survival_content.GameContent
 
 # Game
-game_def_registry['survival_grid'] = survival_config.game_def
+game_def_registry['survival'] = survival_config.game_def

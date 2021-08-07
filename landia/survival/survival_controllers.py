@@ -1,13 +1,13 @@
 
 from typing import List
 import random
-from ..common import Base, Vector2
-from ..clock import clock
+from landia.common import Base, Vector2
+from landia.clock import clock
 from .survival_common import Effect, StateController, SurvivalContent
 from .survival_objects import AnimateObject, Monster, PhysicalObject, Food
 from .survival_behaviors import PlayingInfection, PlayingTag
-from ..player import Player
-from .. import gamectx
+from landia.player import Player
+from landia import gamectx
 import logging
 
 

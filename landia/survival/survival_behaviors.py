@@ -1,12 +1,10 @@
 
-from random import random
-from landia import game
-from ..common import Vector2
+from landia.common import Vector2
 from .survival_utils import normalize_angle, normalized_direction
-from .. import gamectx
+from landia import gamectx
 from .survival_common import Behavior
 from .survival_objects import AnimateObject
-from ..clock import clock
+from landia.clock import clock
 import random
 
 class FollowAnimals(Behavior):

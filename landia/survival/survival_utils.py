@@ -1,8 +1,8 @@
 
-from ..common import Vector2
+from landia.common import Vector2
 import numpy as np
 from collections import defaultdict
-from .. import gamectx
+from landia import gamectx
 
 def vec_to_coord(v):
     tile_size = gamectx.content.config['tile_size']

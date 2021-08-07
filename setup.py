@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import glob
 
-config_files = [name.replace("landia/", "", 1) for name in glob.glob("landia/contentbundles/survival_grid/**", recursive=True)]
+config_files = [name.replace("landia/", "", 1) for name in glob.glob("landia/survival/**", recursive=True)]
 binary_files = [name.replace("landia/", "", 1) for name in glob.glob("landia/assets/**", recursive=True)]
 
 additional_files = binary_files + config_files

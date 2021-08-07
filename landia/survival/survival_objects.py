@@ -1,30 +1,25 @@
 
-from collections import defaultdict
-from queue import Queue
-from ..asset_bundle import AssetBundle
+import logging
 import math
 import random
-import logging
+from collections import defaultdict
+from queue import Queue
+from typing import Any, Callable, Dict, List
 
-from typing import List, Dict, Any, Callable
-from .. import gamectx
-from ..clock import clock
-from ..common import Vector2
-
-
-from ..itemfactory import ShapeFactory
-from ..object import GObject
-
-from ..player import Player
-from ..event import (DelayedEvent)
-from .survival_utils import coord_to_vec
 import numpy as np
 from gym import spaces
+from landia import gamectx
+from landia.clock import clock
+from landia.common import Base, Vector2
+from landia.event import DelayedEvent, InputEvent, SoundEvent
+from landia.itemfactory import ShapeFactory
+from landia.object import GObject
+from landia.player import Player
 
-from ..event import SoundEvent, InputEvent
-from ..common import Base
-from .survival_utils import angle_to_sprite_direction, ints_to_multi_hot
-from .survival_common import SurvivalContent, StateController, Behavior, Action, Effect, Trigger
+from .survival_common import (Action, Behavior, Effect, StateController,
+                              SurvivalContent, Trigger)
+from .survival_utils import (angle_to_sprite_direction, coord_to_vec,
+                             ints_to_multi_hot)
 
 ACTION_IDLE = "idle"
 ACTION_ATTACK = "attack"

@@ -82,7 +82,10 @@ class Renderer:
     def load_images(self):
         self.images = {}
         for k, (path, frame_id) in self.asset_bundle.image_assets.items():
-            full_path = pkg_resources.resource_filename(__name__, path)
+            if path.startswith("/"):
+                full_path = path
+            else:
+                full_path = pkg_resources.resource_filename(__name__, path)
             if frame_id is None:
                 image = pygame.image.load(full_path).convert_alpha()
             else:
