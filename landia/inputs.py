@@ -99,7 +99,6 @@ def get_input_events(player:Player) -> List[Event]:
                     player.set_data_value("CONSOLE_RUN",True)
                     events.append(AdminCommandEvent(value=text,player_id=player_id))
                     player.set_data_value("CONSOLE_TEXT","")
-                    player.set_data_value("INPUT_MODE","PLAY")
                     break
                 elif event.key == pygame.K_BACKSPACE:
                     player.set_data_value("CONSOLE_TEXT",text[:-1]) 

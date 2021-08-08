@@ -20,7 +20,6 @@ import pkg_resources
 import logging
 from .player import Camera
 from .spritesheet import Spritesheet
-from .content import Content
 from .utils import colormap
 
 
@@ -69,30 +68,41 @@ class Renderer:
     def set_log_info(self, log_info):
         self.log_info = log_info
 
+    def get_asset_fullpath(self,path):
+        if path.startswith("/"):
+            return path
+        filepath = os.path.join(self.asset_bundle.path,path)
+        if os.path.exists(filepath):
+            return filepath
+        else:
+            return pkg_resources.resource_filename(__name__, path)
+
     def load_sounds(self):
         if self.config.sound_enabled:
             pass
             for k, sound_data in self.asset_bundle.sound_assets.items():
                 path = sound_data[0]
                 vol = sound_data[1]
-                sound = pygame.mixer.Sound(pkg_resources.resource_filename(__name__, path))
+                sound = pygame.mixer.Sound(self.get_asset_fullpath(path))
                 sound.set_volume(vol)
                 self.sounds[k] = sound
 
     def load_images(self):
         self.images = {}
         for k, (path, frame_id) in self.asset_bundle.image_assets.items():
-            if path.startswith("/"):
-                full_path = path
-            else:
-                full_path = pkg_resources.resource_filename(__name__, path)
-            if frame_id is None:
-                image = pygame.image.load(full_path).convert_alpha()
-            else:
-                if path not in self.sprite_sheets:
-                    self.sprite_sheets[path] = Spritesheet(full_path)
-                image = self.sprite_sheets[path].parse_sprite(frame_id)
-            self.images[k] = image
+            full_path = self.get_asset_fullpath(path)
+            try:
+
+                if frame_id is None:
+                    image = pygame.image.load(full_path).convert_alpha()
+                else:
+                    if path not in self.sprite_sheets:
+                        self.sprite_sheets[path] = Spritesheet(full_path)
+                    image = self.sprite_sheets[path].parse_sprite(frame_id)
+                self.images[k] = image
+            except Exception as e:
+                print(f"Error loading {path} {full_path}")
+                raise e
 
     def play_sounds(self, sound_ids):
         if self.config.sound_enabled:
@@ -103,8 +113,7 @@ class Renderer:
         if self.config.sound_enabled:
             if self.config.sound_enabled:
                 data = self.asset_bundle.music_assets[music_id]
-                full_path = pkg_resources.resource_filename(__name__, data[0])
-                print(f"Loading Music from: {full_path}")
+                full_path = self.get_asset_fullpath(data[0])
                 pygame.mixer.music.load(full_path)
                 pygame.mixer.music.play(-1)
                 pygame.mixer.music.set_volume(data[1])

@@ -3,8 +3,6 @@ from pygame import Vector2
 from .utils import gen_id
 from typing import List, Dict
 import json
-OBJ_TYPES = ['default', 'sensor']
-COLLISION_TYPE = {v: i for i, v in enumerate(OBJ_TYPES)}
 base_class_registry = {}
 
 # def queue_to_list(q):
@@ -81,8 +79,9 @@ def create_dict_snapshot(obj, exclude_keys={}):
                 else:
                     data[k].append(vv)
         else:
-            pass
             # print("Skipping snapshotting of:{} with value {}".format(k, v))
+            pass
+            
     return {"_type": _type, "data": data}
 
 

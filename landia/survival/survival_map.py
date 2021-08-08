@@ -118,10 +118,12 @@ class GameMap:
             objbot.spawn(position=coord_to_vec((xmax, y)))
 
     def random_coords(self, num=1):
+        xrange = self.boundary.get('x',[4,20])
+        yrange = self.boundary.get('y',[4,20])
         xs = np.random.randint(
-            self.boundary['x'][0] + 1, self.boundary['x'][1]-1, num)
+            xrange[0] + 1, xrange[1]-1, num)
         ys = np.random.randint(
-            self.boundary['y'][0]+1, self.boundary['y'][1]-1, num)
+            yrange[0]+1, yrange[1]-1, num)
         return [((xs[i], ys[i])) for i in range(num)]
 
     def load_static_layers(self):

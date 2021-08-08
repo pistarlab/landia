@@ -5,7 +5,6 @@ import time
 
 from .common import Shape, Vector2, load_dict_snapshot, Base,get_shape_from_dict
 from .common import create_dict_snapshot, state_to_dict, ShapeGroup, TimeLoggingContainer
-from .common import COLLISION_TYPE
 from .component import Component
 from .clock import clock
 import copy
@@ -136,11 +135,8 @@ class GObject(Base):
     def __repr__(self) -> str:
         return f"{super().__repr__()}, id:{self.id}, data:{self.data}, dict_data:{self.__dict__}"
 
-    def add_shape(self,shape:Shape, collision_type=1):
+    def add_shape(self,shape:Shape):
         shape.set_object_id(self.get_id())
-        shape.collision_type = collision_type
-        if collision_type == COLLISION_TYPE['sensor']:
-            shape.sensor = True
         self.shape_group.add(shape)
 
     def get_shapes(self):
@@ -156,13 +152,13 @@ class GObject(Base):
         return self.last_change
 
     def get_snapshot(self):
-        data = create_dict_snapshot(self, exclude_keys={'on_change_func'})
+        data = create_dict_snapshot(self, exclude_keys={})
         data['data']['last_change']= self.get_last_change()
         data['data']['data'] = self.data
         return data
 
     def load_snapshot(self, data_dict,exclude_keys=set()):
-        load_dict_snapshot(self, data_dict, exclude_keys={'shape_group'}.union(exclude_keys))
+        load_dict_snapshot(self, data_dict, exclude_keys=exclude_keys)
         data = data_dict['data']
         
         # TODO: using word "data" too much!! rename somethings

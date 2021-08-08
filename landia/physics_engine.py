@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 import numpy
 import pygame
 from .common import (Circle,  Line,
-                     Polygon, Vector2,  COLLISION_TYPE)
+                     Polygon, Vector2)
 from .object import GObject
 # from .player import Player
 from .utils import gen_id
@@ -84,8 +84,8 @@ class GridPhysicsEngine:
 
     def set_collision_callback(self, 
             callback, 
-            collision_type_a=COLLISION_TYPE['default'], 
-            collision_type_b=COLLISION_TYPE['default']):
+            collision_type_a=0, 
+            collision_type_b=0):
 
         self.collision_callbacks[(collision_type_a,collision_type_b)] = callback
         self.collision_callbacks[(collision_type_b,collision_type_a)] = callback
@@ -137,10 +137,11 @@ class GridPhysicsEngine:
                     obj2:GObject = self.space.get_obj_by_id(obj_id_2)
                     if not obj2.enabled:
                         continue
-                    collition_types1 = [shape.collision_type for shape in obj.get_shapes()]
-                    collition_types2 = [shape.collision_type for shape in obj2.get_shapes()]
-                    for col_type1 in collition_types1:
-                        for col_type2 in collition_types2:                            
+                    collision_types1 = [shape.collision_type for shape in obj.get_shapes()]
+                    collision_types2 = [shape.collision_type for shape in obj2.get_shapes()]
+
+                    for col_type1 in collision_types1:
+                        for col_type2 in collision_types2:
                             cb = self.collision_callbacks.get((col_type1,col_type2))
                             if cb is not None and cb(obj,obj2):
                                 collision_effect = True
@@ -158,3 +159,4 @@ class GridPhysicsEngine:
                     callback(True)
 
         self.position_updates = {}
+

@@ -120,6 +120,9 @@ class StateController(Base):
     def reset(self):
         self.started=True
         pass
+    
+    def disable(self):
+        pass
 
     def update(self):
         pass

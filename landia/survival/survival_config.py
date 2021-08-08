@@ -1,10 +1,12 @@
 
+from landia import content
 from landia.config import GameDef
 from landia.utils import merged_dict
 import pkg_resources
 import json
 import os
 from pathlib import Path
+import pprint
 
 CONTENT_ID = "survival"
 DEFAULT_TILE_SIZE = 16
@@ -36,11 +38,12 @@ def read_game_config(path, config_filename):
 
 
 def game_def(content_overrides={}):
-
-    
-    data_root = os.path.join(Path.home(),"landia",CONTENT_ID)
+    # TODO: convoluted: add separate arguments for overriding and loading of paths
+   
+    root_path = os.path.join(Path.home(),"landia")
+    data_path = os.path.join(root_path,CONTENT_ID)
     mod_name = "default"
-    mod_root = os.path.join(data_root,mod_name)
+    mod_path = os.path.join(data_path,mod_name)
     game_config_filename = 'game_config.json'
     game_config_root ="config"
     
@@ -48,38 +51,31 @@ def game_def(content_overrides={}):
         "tile_size": DEFAULT_TILE_SIZE,
         "instance_id":"default",
         "game_config_root":game_config_root,
+        "root_path":root_path,
+        "data_path":data_path,
         "mod_name":mod_name,
-        "mod_path":mod_root,
-        "save_path":os.path.join(mod_root,"saves"),
-        "load_file":None,
-        "load_last_save": True #if load_file is none
-        
+        "mod_path":mod_path,
+        "save_path":os.path.join(mod_path,"saves"),
+        "load_file":"default"
     }
+
     content_config = merged_dict(content_config, content_overrides)
     
     full_game_config_root = pkg_resources.resource_filename(__name__,game_config_root)
 
     default_game_config = read_game_config(full_game_config_root,game_config_filename)
     content_config = merged_dict(content_config, default_game_config)
-    content_config = merged_dict(content_config, content_overrides)
     
-    mod_path = content_config.get("mod_path")
+    mod_path = content_overrides.get("mod_path",content_config.get("mod_path"))
     os.makedirs(mod_path,exist_ok=True)
 
     if os.path.exists(os.path.join(mod_path,game_config_filename)):
         mod_game_config = read_game_config(mod_path,game_config_filename)
         content_config = merged_dict(content_config, mod_game_config)
 
+    content_config = merged_dict(content_config, content_overrides)
     save_path = content_config.get("save_path")
     os.makedirs(save_path,exist_ok=True)
-
-    if content_config.get("load_file",None) is None:        
-        if content_config.get("load_last_save",False):
-            # TODO: get last save location for loading and update load_file
-            pass
-    else:
-        # TODO: add code (elsewhere) to load game
-        pass
 
     camera_distance = content_config.get('default_camera_distance')
     if camera_distance is None:

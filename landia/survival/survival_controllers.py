@@ -177,6 +177,8 @@ class FoodCollectController(StateController):
             objs.append(obj)
         self.spawn_food()
 
+
+
     def update(self):
         time_since = clock.get_ticks() - self.last_check
         if time_since > self.check_freq:

@@ -113,6 +113,19 @@ class GameContext:
             'timestamp': snapshot_timestamp,
         }
 
+    def create_full_snapshot(self):
+
+        om_snapshot = self.object_manager.get_snapshot_full()
+        pm_snapshot = self.player_manager.get_snapshot()
+        em_snapshot = self.event_manager.get_snapshot()
+        return  {
+            'om': om_snapshot,
+            'pm': pm_snapshot,
+            'em': em_snapshot,
+            'timestamp': clock.get_ticks(),
+            'gametime': clock.get_game_time(),
+        }
+
     def load_object_snapshot(self, data):
         for odata in data:
             obj_id = odata['data']['id']

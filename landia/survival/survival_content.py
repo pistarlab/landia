@@ -11,7 +11,7 @@ from gym import spaces
 from landia import gamectx
 from landia.camera import Camera
 from landia.clock import clock
-from landia.common import COLLISION_TYPE, Vector2, get_base_cls_by_name
+from landia.common import  Vector2, get_base_cls_by_name,StateDecoder,StateEncoder
 from landia.event import (AdminCommandEvent, DelayedEvent, Event, InputEvent,
                           ObjectEvent, PeriodicEvent, PositionChangeEvent,
                           SoundEvent, ViewEvent)
@@ -29,7 +29,8 @@ from .survival_map import GameMap
 from .survival_objects import *
 from .survival_utils import (int_map_to_onehot_map, ints_to_multi_hot,
                              vec_to_coord)
-
+import dill 
+import pickle
 
 ############################
 # COLLISION HANDLING
@@ -41,7 +42,7 @@ class GameContent(SurvivalContent):
 
     def __init__(self, config):
         super().__init__(config)
-        self.asset_bundle = load_asset_bundle(self.config['asset_bundle'])
+
         self.active_controllers:List[str] = self.config['active_controllers']
         self.map_config = self.config['maps'][self.config['start_map']]
         # TODO, load from game config
@@ -67,6 +68,11 @@ class GameContent(SurvivalContent):
         self.keymap = [23, 19, 4, 1, 5, 6, 18,0, 26,3, 24]
 
         self.loaded = False
+
+        self.asset_bundle = load_asset_bundle(
+            path=self.config['root_path'],
+            asset_bundle_config=self.config['asset_bundle'])
+
         self.gamemap = GameMap(
             paths = [self.config.get("game_config_root"),self.config.get("mod_path")],
             map_config=self.map_config,
@@ -210,13 +216,16 @@ class GameContent(SurvivalContent):
     def load(self, is_client_only=False):
         self.loaded = False
         if not is_client_only:
-            self.gamemap.initialize((0,0))
+            if self.config['load_file'] is None:
+                self.gamemap.initialize((0,0))
+            else:
+                self.gamemap.loaded= True
+                self.gamemap.initialize((0,0))
+                self.load_from_save(self.config['load_file'])
+                
             self.load_controllers()
 
-        gamectx.physics_engine.set_collision_callback(
-            default_collision_callback,
-            COLLISION_TYPE['default'],
-            COLLISION_TYPE['default'])
+        gamectx.physics_engine.set_collision_callback(default_collision_callback)
         self.loaded = True
 
     def reset(self):
@@ -274,8 +283,14 @@ class GameContent(SurvivalContent):
     # **********************************
     def new_player(self, client_id, player_id=None, player_type=0, is_human=False) -> Player:
         if player_id is None:
+            for pid, player in gamectx.player_manager.players_map.items():
+                if player.client_id == client_id:
+                    player_id = pid
+        if player_id is None:
             player_id = gen_id()
+    
         player = gamectx.player_manager.get_player(player_id)
+
         if player is None:
             cam_distance = self.default_camera_distance
             player = Player(
@@ -290,6 +305,17 @@ class GameContent(SurvivalContent):
                 self.get_controller_by_id(controller_id).join(player)
             # self.get_controller_by_id("pspawn").spawn_player(player,reset=True)
         return player
+
+    def load_from_save(self,savename):
+        full_save_path = os.path.join(self.config['save_path'],f"{savename}.json")
+        print(f"Loading from save file {full_save_path}")
+        with open(full_save_path,"r") as f:
+            snapshot = json.load(f,cls=StateDecoder)
+        gamectx.remove_all_events()
+        gamectx.object_manager.clear_objects()
+        gamectx.load_snapshot(snapshot)            
+        for oid, o in gamectx.object_manager.get_objects().items():
+            o.sync_position()
 
     ########################
     # GET INPUT
@@ -326,12 +352,44 @@ class GameContent(SurvivalContent):
             p = gamectx.player_manager.get_player(admin_event.player_id)
             o = gamectx.object_manager.get_by_id(p.get_object_id())
             pos = o.get_view_position()
-            print(pos)
             spawn_pos = self.get_near_location(pos)
             if spawn_pos is not None:
                 config_id = command_parts[1]
                 obj = self.create_object_from_config_id(config_id)
                 obj.spawn(spawn_pos)
+        elif value.startswith("save"):
+            command_parts = value.split(" ")
+            if len(command_parts) == 2:
+                savename = command_parts[1]
+            else:
+                savename = "default"
+            snapshot = gamectx.create_full_snapshot()
+            timestamp = snapshot['timestamp']
+            
+            full_save_path = os.path.join(self.config['save_path'],f"{savename}.json")
+            self.log_console(f"Saving to {full_save_path}")
+            with open(full_save_path,"w") as f:
+                json.dump(snapshot,f,cls=StateEncoder)
+
+        elif value.startswith("load"):
+            command_parts = value.split(" ")
+            if len(command_parts) == 2:
+                savename = command_parts[1]
+            else:
+                savename = "default"
+            self.load_from_save(savename)
+            # full_save_path = os.path.join(self.config['save_path'],f"{savename}.json")
+            # with open(full_save_path,"r") as f:
+            #     snapshot = json.load(f,cls=StateDecoder)
+            # gamectx.remove_all_events()
+            # gamectx.object_manager.clear_objects()
+            # gamectx.load_snapshot(snapshot)            
+            # for oid, o in gamectx.object_manager.get_objects().items():
+            #     o.sync_position()
+            
+            # clock.set_start_time(time.time() - snapshot['gametime'] )    
+
+            
         elif value.startswith("run"):
             command_parts = value.split(" ")
             script_name = command_parts[1]
@@ -349,7 +407,6 @@ class GameContent(SurvivalContent):
             p = gamectx.player_manager.get_player(admin_event.player_id)
             o = gamectx.object_manager.get_by_id(p.get_object_id())
             pos = o.get_view_position()
-            print(pos)
             spawn_pos = self.get_near_location(pos)
             if spawn_pos is not None:
                 config_id = command_parts[1]
@@ -475,6 +532,7 @@ class GameContent(SurvivalContent):
         p.set_data_value("messages",msgs)
 
     def log_console(self,message,player_id=None):
+        print(f"Log message:{message}")
         for pid,p in gamectx.player_manager.players_map.items():
             if p is not None and (player_id is None or pid == player_id):
                 log = p.get_data_value("log",[])

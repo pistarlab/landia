@@ -135,7 +135,7 @@ def get_arguments(override_args=None):
     parser.add_argument("--tick_rate", default=60, type=int, help="tick_rate")
 
     parser.add_argument("--game_id", default="survival", help="id of game")
-    parser.add_argument("--content_overrides", default="{}", type=str,help="JSON string containing content updates. eg --content_overrides='{\"player_start_energy\":35}'")
+    parser.add_argument("--content_overrides", default="{}", type=str,help="Content overrides in JSON format Eg: --content_overrides='{\"maps\":{\"main\":{\"static_layers\":[\"map_layer_test.txt\"]}}}'")
     parser.add_argument("--log_level",default="info",help=", ".join(list(LOG_LEVELS.keys())),type=str)
     return  parser.parse_args(override_args)
 
@@ -148,7 +148,6 @@ def run(args):
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
     
     logging.getLogger().setLevel(LOG_LEVELS.get(args.log_level))
-    print(args.__dict__)
 
     if not args.enable_server and not args.enable_client and not args.remote_client:
         args.enable_client = True
@@ -200,7 +199,6 @@ def run(args):
         show_console= args.show_console,
         enable_resize = args.enable_resize,
         disable_hud = args.disable_hud
-
     )
 
     content: Content = load_game_content(game_def)
