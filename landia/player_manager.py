@@ -22,6 +22,10 @@ class PlayerManager:
         """
         self.players_map[str(player.uid)] = player
 
+    def get_players_by_types(self,type_set):
+        return [player for player in self.players_map.values() if player.player_type in type_set]
+
+
     def get_player(self, uid) -> Player:
         return self.players_map.get(str(uid), None)
 

@@ -5,7 +5,7 @@
     "start_map": "main",
     "step_duration_factor" : 0.2,
     "player_types": {
-        "1": {
+        "default": {
             "default_camera_distance": 160,
             "config_id": "human1"
         }

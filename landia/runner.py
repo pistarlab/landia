@@ -2,12 +2,8 @@
 import argparse
 import json
 import logging
-import math
-import socketserver
-import struct
 import threading
 
-import lz4.frame
 from pyinstrument import Profiler
 from landia.client import GameClient
 
@@ -40,6 +36,7 @@ def get_game_def(
         remote_client,
         port,
         tick_rate=None,
+        step_mode =False,
         content_overrides={}
 ) -> GameDef:
     game_def = load_game_def(game_id, content_overrides)
@@ -47,6 +44,7 @@ def get_game_def(
     game_def.server_config.enabled = enable_server
     game_def.server_config.hostname = '0.0.0.0'
     game_def.server_config.port = port
+    game_def.game_config.step_mode = step_mode
 
     # Game
     game_def.game_config.tick_rate = tick_rate
@@ -117,7 +115,7 @@ def get_arguments(override_args=None):
     parser.add_argument("--client_id", default=gen_id(), help="user id, default is random")
     parser.add_argument("--render_shapes", action='store_true', help="render actual shapes")
     parser.add_argument("--fps", default=60, type=int, help="fps")
-    parser.add_argument("--player_type", default=0, type=int, help="Player type (0=default, 10=observer_only)")
+    parser.add_argument("--player_type", default="default", type=str, help="Player type ")
     parser.add_argument("--view_type", default=0, type=int, help="NOT USED at moment: View type (0=perspective, 1=world)")
     parser.add_argument("--tile_size", default=16, type=int, help="not = no grid")
     parser.add_argument("--debug_render_bodies", action="store_true", help=" render")
@@ -137,6 +135,9 @@ def get_arguments(override_args=None):
     parser.add_argument("--game_id", default="survival", help="id of game")
     parser.add_argument("--content_overrides", default="{}", type=str,help="Content overrides in JSON format Eg: --content_overrides='{\"maps\":{\"main\":{\"static_layers\":[\"map_layer_test.txt\"]}}}'")
     parser.add_argument("--log_level",default="info",help=", ".join(list(LOG_LEVELS.keys())),type=str)
+    
+    parser.add_argument("--step_mode", action="store_true", help="Step mode (requires input for game time to proceed)")
+    
     return  parser.parse_args(override_args)
 
 
@@ -168,7 +169,8 @@ def run(args):
         remote_client=args.remote_client,
         port=args.port,
         tick_rate=args.tick_rate,
-        content_overrides = json.loads(args.content_overrides)
+        step_mode = args.step_mode,
+        content_overrides = json.loads(args.content_overrides),
     )
 
     # Get resolution

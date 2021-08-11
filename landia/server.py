@@ -33,7 +33,10 @@ class UDPHandler(socketserver.BaseRequestHandler):
 
         request_message = request_info['message']
         client = gamectx.get_remote_client(request_info['client_id'])
-        player = gamectx.get_player(client, player_type=request_info['player_type'],is_human=request_info['is_human'])
+        player = gamectx.get_player(
+            client, 
+            player_type=request_info['player_type'],
+            is_human=request_info['is_human'])
         snapshots_received = request_info['snapshots_received']
 
         # simulate missing parts

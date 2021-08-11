@@ -13,7 +13,7 @@
     "low_energy_health_penalty": 1,
     "attack_strength": 20,
     "inventory_size": 1,
-    "walk_speed": 1.25,
+    "walk_speed": 1,
     "walk_stamina_usage": 2,
     "attack_speed": 0.75,
     "vision_radius": 4,

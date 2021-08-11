@@ -19,7 +19,6 @@ class PlayerSpawnController(StateController):
 
     def reset_player(self, player: Player):
         player.set_data_value("lives_used", 0)
-        player.set_data_value("food_reward_count", 0)
         player.set_data_value("reset_required", False)
         player.set_data_value("allow_obs", True)
         player.events = []
@@ -41,7 +40,7 @@ class PlayerSpawnController(StateController):
             player_object = gamectx.object_manager.get_by_id(player.get_object_id())
         else:
             # TODO: get playertype from game mode + client config
-            player_config = self.content.get_game_config()['player_types']['1']
+            player_config = self.content.get_game_config()['player_types']['default']
             config_id = player_config['config_id']
             player_object: PhysicalObject = self.content.create_object_from_config_id(config_id)
             player_object.set_player(player)
@@ -59,7 +58,7 @@ class PlayerSpawnController(StateController):
         return player_object
 
     def spawn_players(self, reset=True):
-        for player in gamectx.player_manager.players_map.values():
+        for player in gamectx.player_manager.get_players_by_types(type_set={"default"}):
             self.spawn_player(player, reset)
 
 
@@ -175,7 +174,7 @@ class FoodCollectController(StateController):
             obj.add_trigger("receive_grab", "collect", self.collected_trigger)
             self.food_ids.add(obj.get_id())
             objs.append(obj)
-        self.spawn_food()
+        # self.spawn_food()
 
 
 

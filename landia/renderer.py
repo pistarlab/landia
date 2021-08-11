@@ -152,7 +152,10 @@ class Renderer:
         else:
             flags = pygame.DOUBLEBUF
 
-        self._display_surf = pygame.display.set_mode(self.resolution, flags)
+        if self.config.render_to_screen:
+            self._display_surf = pygame.display.set_mode(self.resolution, flags)
+        else:
+            self._display_surf = pygame.Surface(self.resolution)
         self.load_sounds()
         self.load_images()
         self.play_music("background")
@@ -478,7 +481,7 @@ class Renderer:
 
     # TODO: Clean this up
     def process_frame(self,
-                      player: Player):
+                      player: Player = None):
 
         if not self.initialized:
             self.initialize()
@@ -540,6 +543,9 @@ class Renderer:
             pygame.draw.rect(self._display_surf,
                              (255, 255, 50),
                              pygame.Rect(self.width/2, self.height/2, 5, 5))
+
+    def stack_surface(self,surface,loc=(0,0)):
+        self._display_surf.blit(surface,loc)
 
     def render_frame(self):
         self.fps_clock.tick()

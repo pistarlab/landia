@@ -36,10 +36,9 @@ class LandiaEnv:
                  enable_server=False,
                  view_type=0,
                  render_shapes=False,
-                 player_type=1,
+                 player_type="default",
                  include_state_observation=False,
                  remote_client=False,
-                 render_to_screen=False,
                  content_overrides={}):
 
         game_def = get_game_def(
@@ -68,6 +67,29 @@ class LandiaEnv:
         self.possible_players = self.players
         self.max_num_players = self.num_players
 
+        self.admin_player_def = get_player_def(
+            enable_client=False,
+            client_id=None,
+            remote_client=remote_client,
+            hostname=hostname,
+            port=port,
+            resolution=[800, 600],
+            fps=tick_rate,
+            render_shapes=render_shapes,
+            render_to_screen=True,
+            player_type="admin",
+            is_human=False,
+            view_type=view_type,
+            include_state_observation=include_state_observation)
+
+        self.admin_client = GameClient(
+            renderer=Renderer(
+                self.admin_player_def.renderer_config,
+                asset_bundle=self.content.get_asset_bundle()
+            ),
+            config=self.admin_player_def.client_config)
+        self.admin_client.renderer.initialize()
+
         player_def = None
         for agent_id, agent_info in agent_map.items():
             player_def = get_player_def(
@@ -79,7 +101,7 @@ class LandiaEnv:
                 resolution=resolution,
                 fps=tick_rate,
                 render_shapes=render_shapes,
-                render_to_screen=render_to_screen,
+                render_to_screen=False,
                 player_type=player_type,
                 is_human=False,
                 view_type=view_type,
@@ -95,7 +117,7 @@ class LandiaEnv:
                 asset_bundle=self.content.get_asset_bundle()
             )
 
-            print(player_def.client_config)
+            # print(player_def.client_config)
             client = GameClient(
                 renderer=renderer,
                 config=player_def.client_config)
@@ -191,19 +213,30 @@ class LandiaEnv:
         return True, "msg"
 
     def render(self, mode=None, player_id=None):
+        self.admin_client.run_step()
+        self.admin_client.render()
+        return self.admin_client.get_rgb_array()
         # TODO: add rendering for observer window
-        if player_id is None:
-            for agent_id, client in self.agent_clients.items():
-                if self.dry_run:
-                    return self.observation_spaces[agent_id].sample()
-                client.render()
-                return client.get_rgb_array()
-        else:
-            client = self.agent_clients[player_id]
-            if self.dry_run:
-                return self.observation_spaces[player_id].sample()
-            client.render()
-            return client.get_rgb_array()
+        # if player_id is None:
+        #     # for agent_id, client in self.agent_clients.items():
+        #     #     client.render()
+        #     #     return client.get_rgb_array()
+        #     self.admin_client.render()
+        #     return self.admin_client.get_rgb_array()
+            
+        # else:
+        #     client = self.agent_clients[player_id]
+
+        #     self.admin_renderer.process_frame(client.player)
+        #     self.content.post_process_frame(
+        #         player=client.player,
+        #         renderer=self.admin_renderer)
+        #     self.admin_renderer.render_frame()
+        #     return self.admin_renderer.get_last_frame()
+        #     # if self.dry_run:
+        #     #     return self.observation_spaces[player_id].sample()
+        #     # client.render()
+        #     # return client.get_rgb_array()
 
     def reset(self) -> Dict[str, Any]:
         if not self.remote_client:
@@ -222,7 +255,7 @@ class LandiaEnvSingle(gym.Env):
     def __init__(self,
                  content_overrides={},
                  render_shapes=True,
-                 player_type=1,
+                 player_type="default",
                  view_type=1,
                  tick_rate=0):
         logging.info("Starting SL v21")
@@ -294,13 +327,8 @@ def main():
         remote_client=args.remote_client,
         resolution=resolution,
         dry_run=False,
-        render_to_screen=render,
         tick_rate=args.tick_rate,
-        content_overrides={
-            'active_controllers': ['pspawn', "infect1"],
-            "maps": {
-                "main": {"static_layers": ['map_9x9_vwall.txt']}
-            }})
+        content_overrides={})
 
     done_agents = set()
     start_time = time.time()

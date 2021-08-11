@@ -29,8 +29,6 @@ from .survival_map import GameMap
 from .survival_objects import *
 from .survival_utils import (int_map_to_onehot_map, ints_to_multi_hot,
                              vec_to_coord)
-import dill 
-import pickle
 
 ############################
 # COLLISION HANDLING
@@ -216,12 +214,14 @@ class GameContent(SurvivalContent):
     def load(self, is_client_only=False):
         self.loaded = False
         if not is_client_only:
-            if self.config['load_file'] is None:
-                self.gamemap.initialize((0,0))
-            else:
+            if self.config.get("load_from_file") and self.config.get('load_file') is not None:
+                logging.info("Loading from save")
                 self.gamemap.loaded= True
                 self.gamemap.initialize((0,0))
-                self.load_from_save(self.config['load_file'])
+                self.load_from_save(self.config.get('load_file'))
+            else:
+                logging.info("Loading from new game")
+                self.gamemap.initialize((0,0))
                 
             self.load_controllers()
 
@@ -281,7 +281,7 @@ class GameContent(SurvivalContent):
     # **********************************
     # NEW PLAYER
     # **********************************
-    def new_player(self, client_id, player_id=None, player_type=0, is_human=False) -> Player:
+    def new_player(self, client_id, player_id=None, player_type="default", is_human=False) -> Player:
         if player_id is None:
             for pid, player in gamectx.player_manager.players_map.items():
                 if player.client_id == client_id:
@@ -292,17 +292,37 @@ class GameContent(SurvivalContent):
         player = gamectx.player_manager.get_player(player_id)
 
         if player is None:
-            cam_distance = self.default_camera_distance
-            player = Player(
-                client_id=client_id,
-                uid=player_id,
-                camera=Camera(distance=cam_distance,view_type=1),
-                player_type=player_type,
-                is_human = is_human)
-            gamectx.add_player(player)
-            for controller_id in self.active_controllers:
-                logging.info(f"Adding player to {controller_id}")
-                self.get_controller_by_id(controller_id).join(player)
+            if player_type == "admin":
+                logging.info("Adding admin")
+                size_in_pixels = coord_to_vec(self.gamemap.get_size())
+                max_len = max(size_in_pixels.x,size_in_pixels.y)
+                
+                cam_distance = max_len
+                center = coord_to_vec(self.gamemap.get_center())
+                player = Player(
+                    client_id=client_id,
+                    uid=player_id,
+                    camera=Camera(
+                        distance=cam_distance,
+                        view_type=1,
+                        center=center),
+                    player_type=player_type,
+                    is_human = is_human)
+                gamectx.add_player(player)
+
+            else:
+                cam_distance = self.default_camera_distance 
+                player = Player(
+                    client_id=client_id,
+                    uid=player_id,
+                    camera=Camera(distance=cam_distance,view_type=1),
+                    player_type=player_type,
+                    is_human = is_human)
+                gamectx.add_player(player)
+                for controller_id in self.active_controllers:
+                    logging.info(f"Adding player to controller: {controller_id}")
+                    self.get_controller_by_id(controller_id).join(player)
+            
             # self.get_controller_by_id("pspawn").spawn_player(player,reset=True)
         return player
 
@@ -443,7 +463,7 @@ class GameContent(SurvivalContent):
             angle_update = 90
         
         camera = player.get_camera()
-        camera.position_offset -= direction
+        camera.position_offset -= direction * 5
 
         return events
 
@@ -453,9 +473,7 @@ class GameContent(SurvivalContent):
         player = gamectx.player_manager.get_player(input_event.player_id)
         if player is None:
             return []
-        if not player.get_data_value("allow_input",False):
-            return []
-        # keydown = input_event.input_data['pressed']
+
         keydown = input_event.input_data['keydown']
         # keyup = set(input_event.input_data['keyup'])
 
@@ -469,6 +487,7 @@ class GameContent(SurvivalContent):
             else:
                 player.set_data_value("INPUT_MODE","PLAY")
             return events
+
         # ZOOM
         if 32 in keydown:
             events.append(ViewEvent(player.get_id(), 50, Vector2(0,0)))
@@ -508,17 +527,13 @@ class GameContent(SurvivalContent):
 
         if obj is None or not obj.enabled:
             return events
-        
         elif player.get_data_value("reset_required",False):
             print("Episode is over. Reset required")
             return events
-
-        player = gamectx.player_manager.get_player(input_event.player_id)
-        
-        if player is None or not player.get_data_value("allow_input",False) or player.get_data_value("reset_required",False):
-            return events
-
-        if mode == "PLAY":
+        elif not player.get_data_value("allow_input",False):
+            return events       
+        elif mode == "PLAY":
+            # Process input by object
             obj.assign_input_event(input_event)     
 
         return events
@@ -588,7 +603,7 @@ class GameContent(SurvivalContent):
             return
         pad = round(renderer.resolution[0]/30)
         cpad = round(pad/4)
-        if player is not None and player.player_type == 0:
+        if player is not None:
             input_mode = player.get_data_value("INPUT_MODE", "")
             
             lines = []

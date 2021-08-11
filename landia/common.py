@@ -173,6 +173,8 @@ class Base:
     def load_snapshot(self, data):
         load_dict_snapshot(self, data)
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}:{self.__dict__}"
 
 class PlayerConfig(Base):
 

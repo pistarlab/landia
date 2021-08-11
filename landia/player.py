@@ -22,7 +22,7 @@ class Player(Base):
             player.camera = Camera(**data['camera']['data'])
         return player
 
-    def __init__(self, client_id=None, uid=None, data=None, player_type =0, camera=None, is_human=False):
+    def __init__(self, client_id=None, uid=None, data=None, player_type ="default", camera=None, is_human=False):
         """
         :return:
         """

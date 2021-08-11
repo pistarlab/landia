@@ -4,6 +4,7 @@ import os
 
 import numpy as np
 import pkg_resources
+from pygame.display import update
 from landia import gamectx
 
 from .survival_utils import coord_to_vec
@@ -62,7 +63,7 @@ class GameMap:
                 layer = f.readlines()
                 self.static_layers.append(layer)
         self.index = map_config['index']
-        self.boundary = map_config.get('boundary')
+        self.boundary = map_config.get('boundary',{})
         self.tile_size = tile_size
         self.sector_size = self.tile_size * 4
         self.sectors = {}
@@ -97,7 +98,9 @@ class GameMap:
         xmax = self.boundary['x'][1]
         ymin = self.boundary['y'][0]
         ymax = self.boundary['y'][1]
-        boundary_obj_config_id = self.boundary['obj']
+        boundary_obj_config_id = self.boundary.get('obj')
+        if boundary_obj_config_id is None:
+            return
         keys = set(self.index.keys())
         for x in range(xmin, xmax+1):
             self.spawn_locations = []
@@ -118,15 +121,26 @@ class GameMap:
             objbot.spawn(position=coord_to_vec((xmax, y)))
 
     def random_coords(self, num=1):
-        xrange = self.boundary.get('x',[4,20])
-        yrange = self.boundary.get('y',[4,20])
+        xrange = self.boundary.get('x')
+        yrange = self.boundary.get('y')
         xs = np.random.randint(
             xrange[0] + 1, xrange[1]-1, num)
         ys = np.random.randint(
             yrange[0]+1, yrange[1]-1, num)
         return [((xs[i], ys[i])) for i in range(num)]
 
-    def load_static_layers(self):
+    def get_center(self):
+        x = (self.boundary["x"][1] - self.boundary["x"][0])/2
+        y = (self.boundary["y"][1] - self.boundary["y"][0])/2
+        return (x,y)
+        
+    def get_size(self):
+        x = (self.boundary["x"][1] - self.boundary["x"][0])
+        y = (self.boundary["y"][1] - self.boundary["y"][0])
+        return x,y
+
+
+    def load_static_layers(self, update_boundary = True):
         keys = set(self.index.keys())
         xmin = 0
         xmax = 0
@@ -148,9 +162,8 @@ class GameMap:
                         info = self.index.get(key)
                         self.add(coord, info)
 
-        if "x" not in self.boundary:
-            self.boundary['x'] = [xmin-1, xmax+1]
-        if "y" not in self.boundary:
+        if update_boundary:
+            self.boundary['x'] = [xmin-1, xmax]
             self.boundary['y'] = [ymin-1, ymax+1]
 
     def initialize(self, coord):
@@ -158,6 +171,11 @@ class GameMap:
             self.load_static_layers()
             self.load_boundary()
             self.loaded = True
+        else:
+            if "x" not in self.boundary:
+                self.boundary['x']=[4,20]
+            if "y" not in self.boundary:
+                self.boundary['y']=[4,20]
         self.load_sectors_near_coord(self.get_sector_coord(coord))
 
     def get_neigh_coords(self, scoord) -> set:

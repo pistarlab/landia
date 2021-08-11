@@ -38,7 +38,7 @@ class ClientConfig(Base):
         self.is_remote = True
         self.frames_per_second = 60
         self.is_human = True
-        self.player_type = 0
+        self.player_type = "default"
         self.client_id = None
         self.server_hostname = None
         self.server_port = None
@@ -66,7 +66,7 @@ class GameConfig(Base):
         self.keep_moving = 0
         self.tick_rate = 60
         self.client_only_mode=False
-        self.wait_for_user_input=False
+        self.step_mode=False
 
     def __repr__(self) -> str:
         return pprint.pformat(self.__dict__)

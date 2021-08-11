@@ -49,14 +49,14 @@ def game_def(content_overrides={}):
     
     content_config = {
         "tile_size": DEFAULT_TILE_SIZE,
-        "instance_id":"default",
         "game_config_root":game_config_root,
         "root_path":root_path,
         "data_path":data_path,
         "mod_name":mod_name,
         "mod_path":mod_path,
         "save_path":os.path.join(mod_path,"saves"),
-        "load_file":"default"
+        "load_save":False,
+        "load_file":None
     }
 
     content_config = merged_dict(content_config, content_overrides)
@@ -69,9 +69,16 @@ def game_def(content_overrides={}):
     mod_path = content_overrides.get("mod_path",content_config.get("mod_path"))
     os.makedirs(mod_path,exist_ok=True)
 
-    if os.path.exists(os.path.join(mod_path,game_config_filename)):
-        mod_game_config = read_game_config(mod_path,game_config_filename)
-        content_config = merged_dict(content_config, mod_game_config)
+    mod_path_full =os.path.join(mod_path,game_config_filename)
+    if os.path.exists(mod_path_full):
+        try:
+            mod_game_config = read_game_config(mod_path,game_config_filename)
+            content_config = merged_dict(content_config, mod_game_config)
+        except Exception as e:
+            print(f"Error loading config from file {mod_path_full}: {e}")
+    else:
+        with open(mod_path_full,'w') as fp:
+            json.dump(read_json_file(os.path.join(full_game_config_root,game_config_filename)),fp,indent=4)
 
     content_config = merged_dict(content_config, content_overrides)
     save_path = content_config.get("save_path")
@@ -88,5 +95,5 @@ def game_def(content_overrides={}):
     )
     game_def.physics_config.tile_size = content_config.get("tile_size")
     game_def.physics_config.engine = "grid"
-    game_def.game_config.wait_for_user_input = False
+    
     return game_def

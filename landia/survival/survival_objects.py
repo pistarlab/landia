@@ -245,7 +245,6 @@ class PhysicalObject(GObject):
             "value":self.get_info_box(),
             "scale": (0.5,.5)}]
         
-
     def get_effect_renderables(self):
         effects = dict(self.get_effects())
         renderables = []
@@ -260,7 +259,11 @@ class PhysicalObject(GObject):
                 total_sprite_images = len(sprites)
                 sprite_idx = int((idx/effect.ticks) * total_sprite_images) % total_sprite_images
                 angle = effect.angle_step_size * idx
-                renderables.append({'position': Vector2(0, 0), 'image_id': sprites[sprite_idx], 'angle': angle})
+                renderables.append(
+                    {
+                        'position': Vector2(0, 0), 
+                        'image_id': sprites[sprite_idx], 
+                        'angle': angle})
             
         return renderables
 

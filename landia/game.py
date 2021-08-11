@@ -360,7 +360,7 @@ class GameContext:
                 # print(f"Player: {player.get_id()} {player.get_object_id()}")
                 observation, reward, done, info, _ = self.content.get_step_info(
                     player)
-            if self.config.wait_for_user_input:
+            if self.config.step_mode:
                 print(f"Waiting for input: t={clock.get_ticks()}")
 
                 self.wait_for_input()
