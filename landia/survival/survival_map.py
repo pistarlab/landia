@@ -9,18 +9,15 @@ from landia import gamectx
 
 from .survival_utils import coord_to_vec
 
-
 def rand_int_from_coord(x, y, seed=123):
     v = (x + y * seed) % 12783723
     h = hashlib.sha1()
     h.update(str.encode(f"{v}"))
     return int(h.hexdigest(), 16) % 172837
 
-
 def get_tile_image_id(x, y, seed):
     v = rand_int_from_coord(x, y, seed) % 3 + 1
     return f"grass{v}"
-
 
 class Sector:
 
@@ -35,7 +32,6 @@ class Sector:
         local_items.append(info)
         self.items[coord] = local_items
 
-
 class GameMap:
 
     def __init__(self, paths, map_config, tile_size=16, seed=123):
@@ -43,9 +39,10 @@ class GameMap:
         self.seed = seed
         full_paths = []
         for path in paths:
-            if path.startswith("/")        :
+            if os.path.isabs(path):
                 full_path = path
             else:
+                print(path)
                 full_path = pkg_resources.resource_filename(__name__, path)
             full_paths.append(full_path)
         self.static_layers = []
@@ -138,7 +135,6 @@ class GameMap:
         x = (self.boundary["x"][1] - self.boundary["x"][0])
         y = (self.boundary["y"][1] - self.boundary["y"][0])
         return x,y
-
 
     def load_static_layers(self, update_boundary = True):
         keys = set(self.index.keys())

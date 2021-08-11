@@ -160,3 +160,111 @@ class GridPhysicsEngine:
 
         self.position_updates = {}
 
+import pymunk
+
+class PymunkPhysicsEngine:
+    """
+    Handles physics events and collision
+    """
+
+    def __init__(self,config:PhysicsConfig, em:EventManager):
+        self.config = config
+        self.tile_size = self.config.tile_size
+        self.space = pymunk.Space()
+        self.space.damping = 0.99
+        
+        self.position_updates = {}
+        self.collision_callbacks ={}
+        self.em  = em
+
+    def vec_to_coord(self,v):
+        
+        return (round(v.x / self.tile_size),round(v.y / self.tile_size))#(round(v.x / self.tile_size),round(v.y / self.tile_size))
+
+    def coord_to_vec(self,coord):
+        return Vector2(coord[0] * self.tile_size, coord[1] * self.tile_size)
+
+    def set_collision_callback(self, 
+            callback, 
+            collision_type_a=0, 
+            collision_type_b=0):
+
+        self.collision_callbacks[(collision_type_a,collision_type_b)] = callback
+        self.collision_callbacks[(collision_type_b,collision_type_a)] = callback
+
+
+    def add_object(self, obj: GObject):
+        obj.last_change = clock.get_ticks()
+        obj.set_update_position_callback(self.update_obj_position)
+        body = pymunk.Body(body_type=pymunk.Body.DYNAMIC)
+        shape = pymunk.Circle(body, self.tile_size)
+        shape.friction = 0.5
+        shape.collision_type = 1
+        shape.density = 0.1
+        self.space.add(body, shape)
+
+        self.update_obj_position(obj,obj.get_position(),skip_collision_check=True)
+
+    def update_obj_position(self,obj:GObject,new_pos,skip_collision_check=False,callback=None):
+        if skip_collision_check:
+            self.create_change_position_event(
+                    obj,
+                    old_pos = obj.position,
+                    new_pos=new_pos)
+            if new_pos is not None:
+                coord =self.vec_to_coord(new_pos)
+                self.space.move_obj_to(coord,obj)
+            else:
+                self.space.remove_obj(obj.get_id())
+            obj.set_position(new_pos)
+            if callback is not None:
+                callback(True)
+        else:
+            self.position_updates[obj.get_id()] = (obj,new_pos,callback)
+
+    def create_change_position_event(self,obj:GObject,old_pos,new_pos):
+        e = PositionChangeEvent(
+            obj.get_id(),old_pos=old_pos,new_pos=new_pos,
+            is_player_obj= obj.player_id is not None)
+        self.em.add_event(e)
+
+    def remove_object(self,obj):
+        self.space.remove_obj(obj.get_id())
+
+    def update(self):
+        obj:GObject
+
+        for obj,new_pos,callback in self.position_updates.values():
+            if not obj.enabled:
+                continue
+            new_pos = Vector2(round(new_pos.x),round(new_pos.y))
+            coord =self.vec_to_coord(new_pos)
+            coll_objs_ids = self.space.get_objs_at(coord)
+            collision_effect = False
+            for obj_id_2 in coll_objs_ids:
+                if obj_id_2 != obj.get_id():
+                    obj2:GObject = self.space.get_obj_by_id(obj_id_2)
+                    if not obj2.enabled:
+                        continue
+                    collision_types1 = [shape.collision_type for shape in obj.get_shapes()]
+                    collision_types2 = [shape.collision_type for shape in obj2.get_shapes()]
+
+                    for col_type1 in collision_types1:
+                        for col_type2 in collision_types2:
+                            cb = self.collision_callbacks.get((col_type1,col_type2))
+                            if cb is not None and cb(obj,obj2):
+                                collision_effect = True
+                    
+            if not collision_effect:
+                self.space.move_obj_to(coord,obj)
+                self.create_change_position_event(
+                    obj,
+                    old_pos = obj.position,
+                    new_pos=new_pos)
+
+                obj.set_position(new_pos)
+
+                if callback is not None:
+                    callback(True)
+
+        self.position_updates = {}
