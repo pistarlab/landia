@@ -43,7 +43,7 @@ class GameMap:
         self.seed = seed
         full_paths = []
         for path in paths:
-            if path.startswith("/")        :
+            if os.path.isabs(path)      :
                 full_path = path
             else:
                 full_path = pkg_resources.resource_filename(__name__, path)
