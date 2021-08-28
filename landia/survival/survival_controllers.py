@@ -309,6 +309,7 @@ class InfectionController(StateController):
         self.infected_tag = "infected"
         self.playing_tag = "playinginfection"
         self.tags_used = {self.infected_tag, self.playing_tag}
+        self.game_over = False
 
     def get_objects(self):
         objs = []
@@ -361,6 +362,7 @@ class InfectionController(StateController):
         self.infected_obj_ids.add(obj.get_id())
         self.game_start_tick = clock.get_ticks()
         self.last_infect = clock.get_ticks()
+        self.game_over = False
 
     def receive_damage_trigger(self, source_obj, attacker_obj: AnimateObject, damage):
         if attacker_obj.get_id() in self.obj_ids:
@@ -393,15 +395,19 @@ class InfectionController(StateController):
 
             self.infected_obj_ids.add(target_obj.get_id())
             self.last_infect = clock.get_ticks()
-            target_obj.add_reward(-10)
+
+            target_obj.add_reward(-2)
+            source_obj.add_reward(2)
             self.infect_counter += 1
+            if len(self.infected_obj_ids) == len(self.obj_ids):
+                self.game_over = True
             return False
         else:
             return True
 
     def update(self):
         tag_time = clock.get_ticks() - self.last_infect
-        if tag_time > self.ticks_per_round:
+        if self.game_over or tag_time > self.ticks_per_round:
             print("Resetting infection game")
             for obj in self.get_objects():
                 if obj is not None and not obj.get_id() in self.infected_obj_ids:
@@ -410,6 +416,7 @@ class InfectionController(StateController):
                     obj.add_reward(-2)
 
             self.reset()
+            # self.content.request_reset()
 
 
 # class TagController2(StateController):

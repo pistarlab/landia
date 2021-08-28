@@ -73,8 +73,9 @@ class LandiaEnv:
             remote_client=remote_client,
             hostname=hostname,
             port=port,
-            resolution=[800, 600],
+            resolution=[640, 480],
             fps=tick_rate,
+            sound_enabled=False,
             render_shapes=render_shapes,
             render_to_screen=True,
             player_type="admin",
@@ -98,6 +99,7 @@ class LandiaEnv:
                 remote_client=remote_client,
                 hostname=hostname,
                 port=port,
+                sound_enabled=False,
                 resolution=resolution,
                 fps=tick_rate,
                 render_shapes=render_shapes,
@@ -213,31 +215,14 @@ class LandiaEnv:
         return True, "msg"
 
     def render(self, mode=None, player_id=None):
-        self.admin_client.run_step()
-        self.admin_client.render()
-        return self.admin_client.get_rgb_array()
-        # TODO: add rendering for observer window
-        # if player_id is None:
-        #     # for agent_id, client in self.agent_clients.items():
-        #     #     client.render()
-        #     #     return client.get_rgb_array()
-        #     self.admin_client.render()
-        #     return self.admin_client.get_rgb_array()
+        if player_id is None:
+            self.admin_client.run_step()
+            self.admin_client.render()
+            return self.admin_client.get_rgb_array()
+        else:
+            client = self.agent_clients[player_id]
+            return client.get_rgb_array()
             
-        # else:
-        #     client = self.agent_clients[player_id]
-
-        #     self.admin_renderer.process_frame(client.player)
-        #     self.content.post_process_frame(
-        #         player=client.player,
-        #         renderer=self.admin_renderer)
-        #     self.admin_renderer.render_frame()
-        #     return self.admin_renderer.get_last_frame()
-        #     # if self.dry_run:
-        #     #     return self.observation_spaces[player_id].sample()
-        #     # client.render()
-        #     # return client.get_rgb_array()
-
     def reset(self) -> Dict[str, Any]:
         if not self.remote_client:
             self.content.reset()

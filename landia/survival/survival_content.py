@@ -599,95 +599,110 @@ class GameContent(SurvivalContent):
 
     # Function to manually draw to frame
     def post_process_frame(self, player: Player, renderer: Renderer):
-        if renderer.config.disable_hud:
+        if player is None:
             return
+    
         pad = round(renderer.resolution[0]/30)
         cpad = round(pad/4)
-        if player is not None:
-            input_mode = player.get_data_value("INPUT_MODE", "")
-            
-            lines = []
+        fsize= round(renderer.resolution[1]/50)
+        msg_fsize = round(renderer.resolution[1]/20)
+        msg_fspacing = msg_fsize
+        
+        input_mode = player.get_data_value("INPUT_MODE", "")
+        
+        obj:AnimateObject = gamectx.object_manager.get_by_id(player.get_object_id())
+        show_console = input_mode == "CONSOLE" or renderer.config.show_console
+
+        
+        lines = []
+        if show_console:
             lines.append("Lives Used: {}".format(player.get_data_value("lives_used", 0)))
             lines.append("INPUT_MODE:{}".format(input_mode))
             lines.append("Step Duration Factor (larger = slower) {}".format(self._step_duration_factor))
-
-            obj:AnimateObject = gamectx.object_manager.get_by_id(player.get_object_id())
-            obj_health = 0
-            show_console = input_mode == "CONSOLE" or renderer.config.show_console
-            #TODO: instead render as part of hud via infobox
-            if obj is not None:
-                obj_health = obj.health
-                lines.append(f"Total Reward: {obj.total_reward}")
-                lines.append(f"Inventory: {obj.get_inventory().as_string()}")
-                lines.append(f"Craft Menu: {obj.get_craftmenu().as_string()}")
-
-                # TODO: make HUD optional/ configurable
-                bar_height = round(renderer.resolution[1] /40)
-                bar_width_max = round(renderer.resolution[0] /6)
-                bar_padding = round(renderer.resolution[1] /200)
-
-                tlheight = renderer.resolution[1] - bar_height - bar_padding
-                bar_width = round(obj.stamina/obj.stamina_max * bar_width_max)
-
-                # Stamina
-                renderer.draw_rectangle(bar_padding,tlheight, bar_width,bar_height, color=(0,0,200))
-
-                # Energy
-                tlheight = tlheight - bar_height - bar_padding
-                bar_width = round(obj.energy/obj.energy_max * bar_width_max)
-                renderer.draw_rectangle(bar_padding,tlheight, bar_width,bar_height, color=(200,200,0))
-
-                # Health
-                tlheight = tlheight - bar_height - bar_padding
-                bar_width = round(obj.health/obj.health_max * bar_width_max)
-                renderer.draw_rectangle(
-                    bar_padding,
-                    tlheight, 
-                    bar_width,
-                    bar_height, 
-                    color=(200,0,0))
-
-                renderer.draw_rectangle(
-                    bar_width_max + bar_padding,
-                    tlheight, 
-                    bar_padding/2,
-                    renderer.resolution[1] - tlheight - bar_padding, 
-                    color=(200,200,200))
-            
-            if show_console:
-                lines.append("FPS:{}".format(round(renderer.fps_clock.get_fps())))
-                if renderer.log_info is not None:
-                    lines.append(renderer.log_info)
-                log = player.get_data_value("log",[])
-                if len(log) > 5:
-                    log = log[-5:]
-                    player.set_data_value("log",log)
+            lines.append("FPS:{}".format(round(renderer.fps_clock.get_fps())))
+                        
+            if renderer.log_info is not None:
+                lines.append(renderer.log_info)
+            log = player.get_data_value("log",[])
+            if len(log) > 5:
+                log = log[-5:]
+                player.set_data_value("log",log)
+            elif len(log)== 0:
+                log.append(" ")
+            lines.append("")
+            lines.append("--------- LOG -----------")
+            lines.extend(log)
+            if input_mode == "CONSOLE":
                 lines.append("")
-                lines.append("--------- LOG -----------")
-                lines.extend(log)
-                if input_mode == "CONSOLE":
-                    lines.append("$> {}".format(player.get_data_value("CONSOLE_TEXT", "_")))
-                    lines.append("")
-                    lines.append("--------- HELP ---------")
-                    lines.append(" ")
-                    lines.append("  CONTROLS:")
-                    lines.append("    console/show help   : ` or h (ESC to return to PLAY MODE")
-                    lines.append("    camera mode         : m (ESC to return to PLAY MODE")
-                    lines.append("    move                : w,s,d,a or UP,DOWN,LEFT,RIGHT")
-                    lines.append("    push                : g")
-                    lines.append("    grab                : e")
-                    lines.append("    item  - menu select : z,c")
-                    lines.append("    item  - use         : r")
-                    lines.append("    craft - menu select : v,b")
-                    lines.append("    craft - create      : q")
-                    lines.append("    game step duration   : \"-\" (faster)/\"=\" (slower) ")
-                    lines.append("")
-                    lines.append("  CONSOLE COMMANDS:")
-                    lines.append("    reset             : Reset Game")
-                    lines.append("    spawn <object_id> : Spawn Object")
-                    # lines.append("    controller disable <controler_id>  : ")
-                    
-            renderer.render_to_console(lines, x=cpad, y=cpad)
+                lines.append("$> {}".format(player.get_data_value("CONSOLE_TEXT", "_")))
+                lines.append("")
+                lines.append("--------- HELP ---------")
+                lines.append(" ")
+                lines.append("  CONTROLS:")
+                lines.append("    console/show help   : ` or h (ESC to return to PLAY MODE")
+                lines.append("    camera mode         : m (ESC to return to PLAY MODE")
+                lines.append("    move                : w,s,d,a or UP,DOWN,LEFT,RIGHT")
+                lines.append("    push                : g")
+                lines.append("    grab                : e")
+                lines.append("    item  - menu select : z,c")
+                lines.append("    item  - use         : r")
+                lines.append("    craft - menu select : v,b")
+                lines.append("    craft - create      : q")
+                lines.append("    game step duration   : \"-\" (faster)/\"=\" (slower) ")
+                lines.append("")
+                lines.append("  CONSOLE COMMANDS:")
+                lines.append("    reset             : Reset Game")
+                lines.append("    spawn <object_id> : Spawn Object")
+                # lines.append("    controller disable <controler_id>  : ")
+                
+
+        renderer.render_to_console(lines, x=cpad, y=cpad, fsize=fsize)
+
+        # HUD
+        if obj is not None and not renderer.config.disable_hud:
+            # TODO: make HUD optional/ configurable
+                            
+            bar_height = round(renderer.resolution[1] /40)
+            bar_width_max = round(renderer.resolution[0] /6)
+            bar_padding = round(renderer.resolution[1] /200)
+            info_x = bar_width_max + bar_padding * 3
+            info_y = renderer.resolution[1] - bar_height * 3 -bar_padding
+
+            tlheight = renderer.resolution[1] - bar_height - bar_padding
+            bar_width = round(obj.stamina/obj.stamina_max * bar_width_max)
+
+            # Stamina
+            renderer.draw_rectangle(bar_padding,tlheight, bar_width,bar_height, color=(0,0,200))
+
+            # Energy
+            tlheight = tlheight - bar_height - bar_padding
+            bar_width = round(obj.energy/obj.energy_max * bar_width_max)
+            renderer.draw_rectangle(bar_padding,tlheight, bar_width,bar_height, color=(200,200,0))
+
+            # Health
+            tlheight = tlheight - bar_height - bar_padding
+            bar_width = round(obj.health/obj.health_max * bar_width_max)
+            renderer.draw_rectangle(
+                bar_padding,
+                tlheight, 
+                bar_width,
+                bar_height, 
+                color=(200,0,0))
+
+            renderer.draw_rectangle(
+                bar_width_max + bar_padding,
+                tlheight, 
+                bar_padding/2,
+                renderer.resolution[1] - tlheight - bar_padding, 
+                color=(200,200,200))
+
+            # TODO: Need Hud version for Agents
+            if player.is_human:
+                hud_lines = []
+                hud_lines.append(f"Total Reward: {obj.total_reward}")
+                hud_lines.append(f"Inventory: {obj.get_inventory().as_string()}")
+                hud_lines.append(f"Craft Menu: {obj.get_craftmenu().as_string()}")
+                renderer.render_to_console(hud_lines, x=info_x, y=info_y, fsize=fsize)
 
             # Show Messages
             message_output=[]
@@ -700,5 +715,10 @@ class GameContent(SurvivalContent):
             
             if len(remaining_messages)>0:
                 player.set_data_value("messages",remaining_messages[-3:])
-                renderer.render_to_console(message_output, x=pad, y=round(renderer.resolution[1]/2), fsize=50)
+                renderer.render_to_console(
+                    message_output, 
+                    x=pad, 
+                    y=round(renderer.resolution[1]/2), 
+                    fsize=msg_fsize,
+                    spacing=msg_fspacing)
             
