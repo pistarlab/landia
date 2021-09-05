@@ -512,12 +512,12 @@
             "assets/tinyadventurepack/Other/Misc/Tree/wood.png",
             null
         ],
-        "wallx": [
-            "assets/tinyadventurepack/Other/Misc/Tree/wall.png",
-            null
-        ],
         "baby_tree": [
             "assets/tinyadventurepack/Other/Misc/Tree/baby_tree.png",
+            null
+        ],
+        "wallx": [
+            "assets/tinyadventurepack/Other/Misc/Tree/wall.png",
             null
         ],
         "rock": [
@@ -530,10 +530,6 @@
         ],
         "deer": [
             "assets/tinyadventurepack/Other/Misc/deer.png",
-            null
-        ],
-        "blue_line": [
-            "assets/tinyadventurepack/Other/Misc/blue_line.png",
             null
         ],
         "blue_line2": [
@@ -550,6 +546,38 @@
         ],
         "cooked_meat1": [
             "assets/tinyadventurepack/Other/Misc/cooked_meat.png",
+            null
+        ],
+        "flag": [
+            "assets/sprites/white_flag.png",
+            null
+        ],
+        "white_box": [
+            "assets/sprites/white_box.png",
+            null
+        ],
+        "red_line": [
+            "assets/sprites/red_line.png",
+            null
+        ],
+        "blue_line": [
+            "assets/sprites/blue_line.png",
+            null
+        ],
+        "blue_flag": [
+            "assets/sprites/blue_flag.png",
+            null
+        ],
+        "red_flag": [
+            "assets/sprites/red_flag.png",
+            null
+        ],
+        "blue_flag_zone": [
+            "assets/sprites/blue_flag_zone.png",
+            null
+        ],
+        "red_flag_zone": [
+            "assets/sprites/red_flag_zone.png",
             null
         ]
     },

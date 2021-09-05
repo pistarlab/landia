@@ -109,12 +109,13 @@ class PhysicalObject(GObject):
         self.collision_type = self.config.get('collision_type', 1)
         self.height = self.config.get('height', 1)
         self.tags = set(self.config.get('tags', []))
-        self.tag_effect_map = self._l_content.config.get("tag_effect_map",{})
+        
         self.collectable = self.config.get('collectable', False)
         self.count_max = self.config.get('count_max', 1)
         self.count = self.config.get('count', 1)
 
-
+        self.default_model_id = self.config.get('model_id',self.config_id)
+        self.model_id = self.default_model_id
         self._l_model = None
         self._l_sounds = None
 
@@ -125,8 +126,6 @@ class PhysicalObject(GObject):
         self.disabled_actions = set(self.config.get('disabled_actions', []))
         self.created_tick = clock.get_ticks()
         
-
-
         self.view_position = None
 
         self.default_action()
@@ -167,13 +166,13 @@ class PhysicalObject(GObject):
 
     def add_tag(self,tag):        
         self.tags.add(tag)
-        if tag in self.tag_effect_map:
-            self.add_effect(Effect(self.tag_effect_map.get(tag)))
+        effect = self._l_content.get_effect_by_tag_id(tag)
+        if effect is not None:
+            self.add_effect(effect)
         
     def remove_tag(self,tag):
         self.tags.discard(tag)
-        if tag in self.tag_effect_map:
-            self.remove_effect(self.tag_effect_map.get(tag))
+        self.remove_effect(self._l_content.tag_effect_map.get(tag))
 
     def add_effect(self, effect: Effect):
         self._effects[effect.config_id] = effect
@@ -181,10 +180,6 @@ class PhysicalObject(GObject):
     def remove_effect(self, config_id):
         if config_id in self._effects:
             del self._effects[config_id]
-
-
-    def get_effect_sprites(self, effect_config_id):
-        return self._l_content.get_effect_sprites(effect_config_id).get('default')
 
     def get_info_box(self):
         rows=[]
@@ -196,6 +191,7 @@ class PhysicalObject(GObject):
             'value':self.health/self.health_max,                    
             'color':(255,0,0),
             'bg_color':(100,100,100)}
+
         tag_info = {
             'name': "tags",
             'label': 'Tags: ',
@@ -204,6 +200,7 @@ class PhysicalObject(GObject):
             'value': [self._l_content.tag_int_map[tag] for tag in self.tags],
             "size": self._l_content.max_tags
         }
+
         action_info = {
             'name': "action_list",
             'label': 'Actions: ',
@@ -212,6 +209,7 @@ class PhysicalObject(GObject):
             'value': [ACTION_MAP[self.get_action().type]],
             "size": len(ACTION_LIST)
         }
+
         action_name = {
             'name': "action_name",
             'type' : 'text',
@@ -253,7 +251,7 @@ class PhysicalObject(GObject):
                 self.remove_effect(name)
                 continue
             if effect.type == "sprite":
-                sprites = self.get_effect_sprites(effect.config_id)
+                sprites = self._l_content.get_object_sprites(effect.model_id)['default']
                 cur_tick = clock.get_ticks()
                 idx = cur_tick - effect.start_tick
                 total_sprite_images = len(sprites)
@@ -269,14 +267,14 @@ class PhysicalObject(GObject):
 
     def get_default_image(self):
         if self._l_model is None:
-            self._l_model = self._l_content.get_object_sprites(self.config_id)
+            self._l_model = self._l_content.get_object_sprites(self.model_id)
         return self._l_model.get('default', [self.image_id_default])
 
-    def get_sprites(self, action: Action, angle):
+    def get_sprites(self, action_type, angle):
         if self._l_model is None:
-            self._l_model = self._l_content.get_object_sprites(self.config_id)
+            self._l_model = self._l_content.get_object_sprites(self.model_id)
 
-        action_sprite = self._l_model.get(action)
+        action_sprite = self._l_model.get(action_type)
         if action_sprite is None:
             action_sprite = self._l_model.get(self.default_action_type)
             if action_sprite is None:

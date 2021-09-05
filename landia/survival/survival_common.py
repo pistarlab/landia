@@ -45,6 +45,7 @@ class Effect(Base):
 
     def __init__(self, 
             config_id="", 
+            model_id=None,
             ticks=1, 
             step_size=1, 
             angle_step_size=0,
@@ -52,6 +53,7 @@ class Effect(Base):
             type="sprite",
             data = {}):
         self.config_id = config_id
+        self.model_id = model_id or config_id
         self.ticks = ticks
         self.step_size = step_size
         self.start_tick = clock.get_ticks()

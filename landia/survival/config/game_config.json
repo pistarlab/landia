@@ -3,57 +3,65 @@
     "tile_size": 16,
     "asset_bundle": "asset_bundle.json",
     "start_map": "main",
-    "step_duration_factor" : 0.2,
+    "step_duration_factor": 0.2,
     "player_types": {
         "default": {
             "default_camera_distance": 160,
             "config_id": "human1"
         }
     },
-    "active_controllers":["pspawn","foodcollect","objcollision"],
-    "controllers":{
-        "pspawn":{
-            "class":"PlayerSpawnController",
-            "config":{
-
-            }
-
+    "active_controllers": [
+        "pspawn",
+        "foodcollect",
+        "objcollision",
+        "ctf"
+    ],
+    "controllers": {
+        "pspawn": {
+            "class": "PlayerSpawnController",
+            "config": {}
         },
-        "foodcollect":{
-            "class":"FoodCollectController",
-            "config":{
-
-            }
+        "foodcollect": {
+            "class": "FoodCollectController",
+            "config": {}
         },
-        "objcollision":{
-            "class":"ObjectCollisionController",
-            "config":{
-
-            }
+        "objcollision": {
+            "class": "ObjectCollisionController",
+            "config": {}
         },
-        "tag1":{
-            "class":"TagController",
-            "config":{
-
-            }
+        "tag1": {
+            "class": "TagController",
+            "config": {}
         },
-        "infect1":{
-            "class":"InfectionController",
-            "config":{
-
-            }
+        "infect1": {
+            "class": "InfectionController",
+            "config": {}
+        },
+        "ctf": {
+            "class": "CTFController",
+            "config": {}
         }
     },
-    "tag_list":["tagged","playingtag","food_collect","playinginfection","infected"],
+    "tag_list": [
+        "tagged",
+        "playingtag",
+        "food_collect",
+        "playinginfection",
+        "infected",
+        "redteam",
+        "blueteam",
+        "hasflag",
+        "ctf"
+    ],
     "maps": {
         "main": {
             "format": "txt",
             "path": "config",
             "boundary": {
-
-                "obj": "rock1"},
+                "obj": "rock1"
+            },
             "static_layers": [
-                "map_9x9_vwall.txt"
+                "map_layer_1.txt"
             ],
             "index": {
                 "s0": {
@@ -103,35 +111,128 @@
                 "ww": {
                     "type": "obj",
                     "obj": "wall1"
+                },
+                "ff": {
+                    "type": "obj",
+                    "obj": "flag"
+                },
+                "rz": {
+                    "type": "obj",
+                    "obj": "red_flag_zone"
+                },
+                "bz": {
+                    "type": "obj",
+                    "obj": "blue_flag_zone"
                 }
             }
         }
     },
-
     "effects": {
-        "blue":{
+        "blue": {
+
+        },
+        "red": {
+
+        },
+        "white_box": {
+
         }
     },
-    "tag_effect_map":{
-        "infected":"blue"
+    "tag_effect_map": {
+        "infected": "blue",
+        "redteam": "red",
+        "blueteam": "blue",
+        "hasflag": "white_box"
+    },
+    "models": {
+        "human1": {},
+        "monster1": {},
+        "apple1": {},
+        "rock1": {
+            "model": {
+                "default": [
+                    "rock"
+                ]
+            }
+        },
+        "blue_flag": {
+            "model": {
+                "default": [
+                    "blue_flag"
+                ]
+            }
+        },
+        "red_flag": {
+            "model": {
+                "default": [
+                    "red_flag"
+                ]
+            }
+        },
+        "blue_flag_zone": {
+            "model": {
+                "default": [
+                    "blue_flag_zone"
+                ]
+            }
+        },
+        "red_flag_zone": {
+            "model": {
+                "default": [
+                    "red_flag_zone"
+                ]
+            }
+        },
+        "flag":{
+            "model": {
+                "default": [
+                    "flag"
+                ]
+            }
+        },
+        "blue": {
+            "model": {
+                "default": [
+                    "blue_line"
+                ]
+            }
+        },
+        "red": {
+            "model": {
+                "default": [
+                    "red_line"
+                ]
+            }
+        },
+        "white_box": {
+            "model": {
+                "default": [
+                    "white_box"
+                ]
+            }
+        }
     },
     "objects": {
         "human1": {
             "class": "Human",
-            "obs_id":0,
+            "obs_id": 0,
             "config": {
-                "disabled_actions":[],
-                "show_info_bar":true,
-                "start_inventory":{"wall1":4},
+                "disabled_actions": [],
+                "show_info_bar": true,
+                "start_inventory": {
+                    "wall1": 4
+                },
                 "craft_items": [
-                    "wall1", "human1", "tree1"
+                    "wall1",
+                    "human1",
+                    "tree1"
                 ]
             }
         },
         "monster1": {
             "class": "Monster",
             "config": {
-                "show_info_bar":true
+                "show_info_bar": true
             }
         },
         "apple1": {
@@ -142,15 +243,15 @@
         },
         "tree1": {
             "class": "Tree",
-            "config":{
+            "config": {
                 "collectable": true,
                 "pushable": false,
                 "count_max": 10,
                 "permanent": false,
-                "health":100,
-                "remove_on_destroy":true,
-                "collision_type":1,
-                "count":1,
+                "health": 100,
+                "remove_on_destroy": true,
+                "collision_type": 1,
+                "count": 1,
                 "default_action": "idle"
             }
         },
@@ -162,20 +263,17 @@
         },
         "rock1": {
             "class": "Rock",
-            "config":{
+            "config": {
                 "collectable": true,
                 "pushable": false,
                 "count_max": 10,
                 "permanent": true,
-                "health":100,
-                "remove_on_destroy":true,
-                "collision_type":1,
-                "count":1,
+                "health": 100,
+                "remove_on_destroy": true,
+                "collision_type": 1,
+                "count": 1,
                 "default_action": "idle"
-            },
-            "model": { 
-                "default": ["rock"]
-               }
+            }
         },
         "perm_stone1": {
             "class": "Rock"
@@ -186,9 +284,27 @@
         "wood1": {
             "class": "PhysicalObject"
         },
+        "flag": {
+            "class": "PhysicalObject",
+            "config": {
+                "collision_type": 0,
+                "collectable": false
+            }
+        },
+        "flag_zone": {
+            "class": "PhysicalObject",
+            "config": {
+                "collision_type": 0,
+                "collectable": false
+            }
+        },
         "wall1": {
             "class": "PhysicalObject",
-            "config":{"craft_requirements": {"wood1":1}}
+            "config": {
+                "craft_requirements": {
+                    "wood1": 1
+                }
+            }
         }
     }
 }

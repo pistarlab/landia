@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Tuple
 
 import numpy as np
 from gym import spaces
+from pygame.key import name
 from landia import gamectx
 from landia.camera import Camera
 from landia.clock import clock
@@ -23,7 +24,7 @@ from landia.utils import gen_id, getsize, getsizewl
 from .survival_assets import load_asset_bundle
 from .survival_behaviors import FleeAnimals, FollowAnimals, PlayingTag
 from .survival_controllers import (FoodCollectController, InfectionController,
-                                   ObjectCollisionController,
+                                   ObjectCollisionController, CTFController,
                                    PlayerSpawnController, TagController)
 from .survival_map import GameMap
 from .survival_objects import *
@@ -55,6 +56,7 @@ class GameContent(SurvivalContent):
         self.tag_list = self.config['tag_list']
         self.max_tags = 10 #Static for now to keep observation space same between configuration, #len(self.tag_list)
         self.tag_int_map = { tag:i for i,tag in enumerate(self.tag_list)}
+        self.tag_effect_map= self.config.get("tag_effect_map",{})
 
         # Object Vector Lookup
         self.obj_int_map = {config_id:value.get('obs_id',i) for i, (config_id, value) in enumerate(self.config['objects'].items())}
@@ -92,7 +94,9 @@ class GameContent(SurvivalContent):
             TagController, 
             PlayerSpawnController,
             ObjectCollisionController,
-            FoodCollectController,InfectionController]
+            FoodCollectController,
+            InfectionController,
+            CTFController]
 
         for cls in self.classes:
             gamectx.register_base_class(cls)
@@ -130,11 +134,27 @@ class GameContent(SurvivalContent):
     def get_controller_by_id(self, cid):
         return self.controllers.get(cid)
 
-    def get_effect_sprites(self,config_id):
-        return self.config['effects'].get(config_id,{}).get('model',{})
+    #TODO, would be better to have it's own copy of the config but network traffic would increase when object is created
+    # def get_effect_sprites(self,config_id):
+    #     return self.config['effects'].get(config_id,{}).get('model',{})
 
-    def get_object_sprites(self,config_id):
-        return self.config['objects'].get(config_id,{}).get('model',{})
+    def get_effect_by_tag_id(self,tag):
+        effect_id = self.tag_effect_map.get(tag)
+        if effect_id is None:
+            return None
+        else:
+            return self.get_effect_by_id(effect_id)
+
+    def get_effect_by_id(self,effect_id):
+        data = self.config['effects'].get(effect_id,None)
+        if data is not None:
+            return Effect(config_id=effect_id,**data['config'])
+        return None
+
+
+    #TODO, would be better to have it's own copy of the config but network traffic would increase when object is created
+    def get_object_sprites(self,model_id):
+        return self.config['models'].get(model_id,{}).get('model',{})
     
     def get_object_sounds(self,config_id):
         return self.config['objects'].get(config_id,{}).get('sounds',{})

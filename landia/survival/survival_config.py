@@ -23,17 +23,32 @@ def read_game_config(path, config_filename):
     game_config = read_json_file(os.path.join(path,config_filename))
     game_config['asset_bundle'] = read_json_file(
             os.path.join(path,game_config['asset_bundle']))
-    for id, obj_data in game_config['controllers'].items():
-        if "config" not in obj_data:
-            obj_data['config'] = read_json_file(os.path.join(path,obj_data.get('config',f"{id}_config.json")))
-    for id, obj_data in game_config['objects'].items():
-        obj_data['config'] = merged_dict(obj_data.get('config',{}),read_json_file(os.path.join(path,obj_data.get('config_file',f"{id}_config.json"))))
-        obj_data['sounds'] = merged_dict(obj_data.get('sounds',{}),read_json_file(os.path.join(path,obj_data.get('sounds_file',f"{id}_sounds.json"))))
-        obj_data['model'] = merged_dict(obj_data.get('model',{}),read_json_file(os.path.join(path,obj_data.get('model_file',f"{id}_model.json"))))
+    for id, data in game_config['controllers'].items():
+        if "config" not in data:
+            data['config'] = merged_dict(data.get('config',{}),read_json_file(os.path.join(path,data.get('config_file',f"{id}_config.json"))))
+    
+    for id, data in game_config['models'].items():
+        data['model'] = merged_dict(data.get('model',{}),read_json_file(os.path.join(path,data.get('model_file',f"{id}_model.json"))))
+    
+    for id, data in game_config['objects'].items():
+        data['config'] = merged_dict(data.get('config',{}),read_json_file(os.path.join(path,data.get('config_file',f"{id}_config.json"))))
+        data['sounds'] = merged_dict(data.get('sounds',{}),read_json_file(os.path.join(path,data.get('sounds_file',f"{id}_sounds.json"))))
+
+        # Create default model entries for objects if they don't exist
+        if "model_id" not in data['config'] and id not in game_config['models']:
+            game_config['models'][id] ={'model': merged_dict(data.get('model',{}),read_json_file(os.path.join(path,data.get('model_file',f"{id}_model.json"))))}
+            data['config']['model_id'] = id
+            
     for id, data in game_config['effects'].items():
-        data['config'] = read_json_file(os.path.join(path,data.get('config_file',f"{id}_config.json")))
-        data['sounds'] = read_json_file(os.path.join(path,data.get('sounds_file',f"{id}_sounds.json")))
-        data['model'] = read_json_file(os.path.join(path,data.get('model_file',f"{id}_model.json")))
+        data['config'] = merged_dict(data.get('config',{}),read_json_file(os.path.join(path,data.get('config_file',f"{id}_config.json"))))
+        data['sounds'] = merged_dict(data.get('sounds',{}),read_json_file(os.path.join(path,data.get('sounds_file',f"{id}_sounds.json"))))
+
+        # Create default model entries for objects if they don't exist
+        if "model_id" not in data['config'] and id not in game_config['models']:
+            game_config['models'][id] ={'model': merged_dict(data.get('model',{}),read_json_file(os.path.join(path,data.get('model_file',f"{id}_model.json"))))}
+            data['config']['model_id'] = id
+        # data['model'] =  merged_dict(data.get('model',{}),read_json_file(os.path.join(path,data.get('model_file',f"{id}_model.json"))))
+    
     return game_config
 
 
@@ -76,9 +91,9 @@ def game_def(content_overrides={}):
             content_config = merged_dict(content_config, mod_game_config)
         except Exception as e:
             print(f"Error loading config from file {mod_path_full}: {e}")
-    else:
-        with open(mod_path_full,'w') as fp:
-            json.dump(read_json_file(os.path.join(full_game_config_root,game_config_filename)),fp,indent=4)
+    # else:
+    #     with open(mod_path_full,'w') as fp:
+    #         json.dump(read_json_file(os.path.join(full_game_config_root,game_config_filename)),fp,indent=4)
 
     content_config = merged_dict(content_config, content_overrides)
     save_path = content_config.get("save_path")
