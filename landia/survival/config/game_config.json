@@ -11,9 +11,7 @@
         }
     },
     "active_controllers": [
-        "pspawn",
-        "foodcollect",
-        "objcollision",
+
         "ctf"
     ],
     "controllers": {
@@ -61,16 +59,12 @@
                 "obj": "rock1"
             },
             "static_layers": [
-                "map_layer_1.txt"
+                "ctf_map_1.txt"
             ],
             "index": {
-                "s0": {
-                    "type": "spawn_point",
-                    "obj": "human1"
-                },
-                "m0": {
-                    "type": "spawn_point",
-                    "obj": "monster1"
+                "sp": {
+                    "type": "obj",
+                    "obj": "spawn_point"
                 },
                 "s1": {
                     "type": "obj",
@@ -116,13 +110,9 @@
                     "type": "obj",
                     "obj": "flag"
                 },
-                "rz": {
+                "fz": {
                     "type": "obj",
-                    "obj": "red_flag_zone"
-                },
-                "bz": {
-                    "type": "obj",
-                    "obj": "blue_flag_zone"
+                    "obj": "flag_zone"
                 }
             }
         }
@@ -136,13 +126,24 @@
         },
         "white_box": {
 
+        },
+        "has_red_flag": {
+            "config" :{
+                "model_id":"red_white_box"
+            }
+
+        },
+        "has_blue_flag": {
+            "config" :{
+                "model_id":"blue_white_box"
+            }
+
         }
     },
     "tag_effect_map": {
         "infected": "blue",
         "redteam": "red",
-        "blueteam": "blue",
-        "hasflag": "white_box"
+        "blueteam": "blue"
     },
     "models": {
         "human1": {},
@@ -210,6 +211,20 @@
                     "white_box"
                 ]
             }
+        },
+        "red_white_box": {
+            "model": {
+                "default": [
+                    "red_white_box"
+                ]
+            }
+        },
+        "blue_white_box": {
+            "model": {
+                "default": [
+                    "blue_white_box"
+                ]
+            }
         }
     },
     "objects": {
@@ -217,7 +232,11 @@
             "class": "Human",
             "obs_id": 0,
             "config": {
+                "energy_decay": 2,
+                "low_energy_health_penalty":2,
                 "disabled_actions": [],
+                "attack_strength": 60,
+                
                 "show_info_bar": true,
                 "start_inventory": {
                     "wall1": 4
@@ -296,6 +315,15 @@
             "config": {
                 "collision_type": 0,
                 "collectable": false
+            }
+        },
+        "spawn_point": {
+            "class": "PhysicalObject",
+            "config": {
+                "collision_type": 0,
+                "collectable": false,
+                "visible":false,
+                "model_id":"white_box"
             }
         },
         "wall1": {

@@ -9,7 +9,7 @@
     "energy_start": 100,
     "energy_max": 100,
     "energy_decay_period": 1,
-    "energy_decay": 1,
+    "energy_decay": 10,
     "low_energy_health_penalty": 1,
     "attack_strength": 20,
     "inventory_size": 1,

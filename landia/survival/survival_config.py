@@ -25,27 +25,27 @@ def read_game_config(path, config_filename):
             os.path.join(path,game_config['asset_bundle']))
     for id, data in game_config['controllers'].items():
         if "config" not in data:
-            data['config'] = merged_dict(data.get('config',{}),read_json_file(os.path.join(path,data.get('config_file',f"{id}_config.json"))))
+            data['config'] = merged_dict(read_json_file(os.path.join(path,data.get('config_file',f"{id}_config.json"))),data.get('config',{}))
     
     for id, data in game_config['models'].items():
-        data['model'] = merged_dict(data.get('model',{}),read_json_file(os.path.join(path,data.get('model_file',f"{id}_model.json"))))
+        data['model'] = merged_dict(read_json_file(os.path.join(path,data.get('model_file',f"{id}_model.json"))),data.get('model',{}))
     
     for id, data in game_config['objects'].items():
-        data['config'] = merged_dict(data.get('config',{}),read_json_file(os.path.join(path,data.get('config_file',f"{id}_config.json"))))
-        data['sounds'] = merged_dict(data.get('sounds',{}),read_json_file(os.path.join(path,data.get('sounds_file',f"{id}_sounds.json"))))
+        data['config'] = merged_dict(read_json_file(os.path.join(path,data.get('config_file',f"{id}_config.json"))),data.get('config',{}))
+        data['sounds'] = merged_dict(read_json_file(os.path.join(path,data.get('sounds_file',f"{id}_sounds.json"))),data.get('sounds',{}))
 
         # Create default model entries for objects if they don't exist
         if "model_id" not in data['config'] and id not in game_config['models']:
-            game_config['models'][id] ={'model': merged_dict(data.get('model',{}),read_json_file(os.path.join(path,data.get('model_file',f"{id}_model.json"))))}
+            game_config['models'][id] ={'model': merged_dict(read_json_file(os.path.join(path,data.get('model_file',f"{id}_model.json"))),data.get('model',{}))}
             data['config']['model_id'] = id
             
     for id, data in game_config['effects'].items():
-        data['config'] = merged_dict(data.get('config',{}),read_json_file(os.path.join(path,data.get('config_file',f"{id}_config.json"))))
-        data['sounds'] = merged_dict(data.get('sounds',{}),read_json_file(os.path.join(path,data.get('sounds_file',f"{id}_sounds.json"))))
+        data['config'] = merged_dict(read_json_file(os.path.join(path,data.get('config_file',f"{id}_config.json"))),data.get('config',{}))
+        data['sounds'] = merged_dict(read_json_file(os.path.join(path,data.get('sounds_file',f"{id}_sounds.json"))),data.get('sounds',{}))
 
         # Create default model entries for objects if they don't exist
         if "model_id" not in data['config'] and id not in game_config['models']:
-            game_config['models'][id] ={'model': merged_dict(data.get('model',{}),read_json_file(os.path.join(path,data.get('model_file',f"{id}_model.json"))))}
+            game_config['models'][id] ={'model': merged_dict(read_json_file(os.path.join(path,data.get('model_file',f"{id}_model.json"))),data.get('model',{}))}
             data['config']['model_id'] = id
         # data['model'] =  merged_dict(data.get('model',{}),read_json_file(os.path.join(path,data.get('model_file',f"{id}_model.json"))))
     

@@ -579,7 +579,16 @@
         "red_flag_zone": [
             "assets/sprites/red_flag_zone.png",
             null
+        ],
+        "red_white_box": [
+            "assets/sprites/red_white_box.png",
+            null
+        ],
+        "blue_white_box": [
+            "assets/sprites/blue_white_box.png",
+            null
         ]
+
     },
     "sounds": {
         "bleep": [

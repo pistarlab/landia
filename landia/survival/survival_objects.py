@@ -109,6 +109,7 @@ class PhysicalObject(GObject):
         self.collision_type = self.config.get('collision_type', 1)
         self.height = self.config.get('height', 1)
         self.tags = set(self.config.get('tags', []))
+        self.visible = self.config.get("visible",True)
         
         self.collectable = self.config.get('collectable', False)
         self.count_max = self.config.get('count_max', 1)
@@ -164,9 +165,9 @@ class PhysicalObject(GObject):
     def remove_trigger(self, fn_name, id):
         del self._l_triggers.get(fn_name)[id]
 
-    def add_tag(self,tag):        
+    def add_tag(self,tag,overrides={}):        
         self.tags.add(tag)
-        effect = self._l_content.get_effect_by_tag_id(tag)
+        effect = self._l_content.get_effect_by_tag_id(tag,overrides)
         if effect is not None:
             self.add_effect(effect)
         
@@ -176,6 +177,11 @@ class PhysicalObject(GObject):
 
     def add_effect(self, effect: Effect):
         self._effects[effect.config_id] = effect
+
+    def add_effect_by_id(self, effect_id,overrides={}):
+        effect = self._l_content.get_effect_by_id(effect_id,overrides)
+        if effect != None:
+            self._effects[effect_id] = effect
 
     def remove_effect(self, config_id):
         if config_id in self._effects:
@@ -519,6 +525,7 @@ class Inventory(PhysicalObject):
                 if inv_obj is not None and inv_obj.config_id == config_id:
                     objs.append((i, inv_obj))
         return objs
+
 
     def remove_selected(self, remove_all=False):
         return self.remove_by_slot(self.selected_slot, remove_all=remove_all)

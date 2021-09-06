@@ -19,7 +19,7 @@ from landia.event import (AdminCommandEvent, DelayedEvent, Event, InputEvent,
 from landia.object import GObject
 from landia.player import Player
 from landia.renderer import Renderer
-from landia.utils import gen_id, getsize, getsizewl
+from landia.utils import gen_id, getsize, getsizewl, merged_dict
 
 from .survival_assets import load_asset_bundle
 from .survival_behaviors import FleeAnimals, FollowAnimals, PlayingTag
@@ -138,17 +138,18 @@ class GameContent(SurvivalContent):
     # def get_effect_sprites(self,config_id):
     #     return self.config['effects'].get(config_id,{}).get('model',{})
 
-    def get_effect_by_tag_id(self,tag):
+    def get_effect_by_tag_id(self,tag, overrides = {}):
         effect_id = self.tag_effect_map.get(tag)
         if effect_id is None:
             return None
         else:
-            return self.get_effect_by_id(effect_id)
+            return self.get_effect_by_id(effect_id, overrides)
 
-    def get_effect_by_id(self,effect_id):
+    def get_effect_by_id(self,effect_id,overrides={}):
         data = self.config['effects'].get(effect_id,None)
         if data is not None:
-            return Effect(config_id=effect_id,**data['config'])
+            config = merged_dict(data['config'],overrides)
+            return Effect(config_id=effect_id,**config)
         return None
 
 
@@ -198,6 +199,7 @@ class GameContent(SurvivalContent):
             raise Exception(f"{config_id} not defined in game_config['objects']")
         cls = get_base_cls_by_name(info['class'])
         obj:PhysicalObject = cls(config_id=config_id,config=info['config'])
+        gamectx.object_manager.add(obj)
         return obj
 
     def get_config_from_config_id(self,config_id):

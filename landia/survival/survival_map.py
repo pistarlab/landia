@@ -210,19 +210,22 @@ class GameMap:
             for info in item_list:
                 self.load_obj_from_info(info, coord)
 
-    def add_spawn_point(self, config_id, pos):
-        pos_list = self.get_spawn_points(config_id)
-        pos_list.append(pos)
-        self.spawn_points[config_id] = pos_list
+    # def add_spawn_point(self, id, pos):
+    #     pos_list = self.get_spawn_points(id)
+    #     pos_list.append(pos)
+    #     self.spawn_points[id] = pos_list
 
-    def get_spawn_points(self, config_id):
-        return self.spawn_points.get(config_id, [])
+    # def get_spawn_points(self, id):
+    #     return self.spawn_points.get(id, [])
 
     def load_obj_from_info(self, info, coord):
-        config_id = info['obj']
+        
+        # TODO: remove spawn_points as special objects, instead add border points and border areas
         if info.get('type') == "spawn_point":
-            self.add_spawn_point(config_id, coord_to_vec(coord))
+            sid = info['id']
+            self.add_spawn_point(sid, coord_to_vec(coord))
         else:
+            config_id = info['obj']
             obj = gamectx.content.create_object_from_config_id(config_id)
             obj.spawn(position=coord_to_vec(coord))
 
