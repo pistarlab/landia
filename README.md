@@ -26,6 +26,7 @@ A fun environment where humans can train and interact with AI agents.
 - Written in Python and requires only a few dependencies.
 - Highly configurable and hackable. Easily add new game modes, objects or maps.
 - Game Modes included:
+    - Capture the flag
     - Survival (collect food or die, avoid monsters)
     - Tag
     - Infection Tag

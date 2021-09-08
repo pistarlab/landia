@@ -11,8 +11,7 @@
         }
     },
     "active_controllers": [
-"ctf"
-       
+        "ctf"
     ],
     "controllers": {
         "pspawn": {
@@ -118,26 +117,18 @@
         }
     },
     "effects": {
-        "blue": {
-
-        },
-        "red": {
-
-        },
-        "white_box": {
-
-        },
+        "blue": {},
+        "red": {},
+        "white_box": {},
         "has_red_flag": {
-            "config" :{
-                "model_id":"red_white_box"
+            "config": {
+                "model_id": "red_white_box"
             }
-
         },
         "has_blue_flag": {
-            "config" :{
-                "model_id":"blue_white_box"
+            "config": {
+                "model_id": "blue_white_box"
             }
-
         }
     },
     "tag_effect_map": {
@@ -184,7 +175,7 @@
                 ]
             }
         },
-        "flag":{
+        "flag": {
             "model": {
                 "default": [
                     "flag"
@@ -233,7 +224,7 @@
             "obs_id": 0,
             "config": {
                 "energy_decay": 2,
-                "low_energy_health_penalty":2,
+                "low_energy_health_penalty": 2,
                 "disabled_actions": [],
                 "attack_strength": 60,
                 "walk_speed": 1.4,
@@ -310,7 +301,7 @@
             "config": {
                 "collision_type": 0,
                 "collectable": false,
-                "model_id":"white_flag"
+                "model_id": "white_flag"
             }
         },
         "flag_zone": {
@@ -318,7 +309,7 @@
             "config": {
                 "collision_type": 0,
                 "collectable": false,
-                "model_id":"white_box"
+                "model_id": "white_box"
             }
         },
         "spawn_point": {
@@ -326,8 +317,8 @@
             "config": {
                 "collision_type": 0,
                 "collectable": false,
-                "visible":false,
-                "model_id":"white_box"
+                "visible": false,
+                "model_id": "white_box"
             }
         },
         "wall1": {

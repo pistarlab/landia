@@ -248,6 +248,22 @@ class FoodCollectController(StateController):
 
             self.last_check = clock.get_ticks()
 
+    def post_process_frame(self, player: Player, renderer: Renderer):
+        if player.player_type == "admin":
+            msg_fsize = round(renderer.full_resolution[1]/40)
+
+            view_port_resolution =renderer.resolution 
+            view_port_offset = renderer.view_port_offset
+
+            lines = []
+            lines.append(f"Landia: Forage")
+            lines.append("-----------------------------")
+                    
+            renderer.render_text(
+                lines, 
+                x=view_port_resolution[0] + view_port_offset[0]*2, 
+                y=view_port_offset[1],
+                fsize=msg_fsize)
 
 class TagController(StateController):
 
@@ -355,6 +371,24 @@ class TagController(StateController):
                     obj.add_reward(10)
             self.content.request_reset()
 
+    def post_process_frame(self, player: Player, renderer: Renderer):
+        if player.player_type == "admin":
+            msg_fsize = round(renderer.full_resolution[1]/40)
+
+            view_port_resolution =renderer.resolution 
+            view_port_offset = renderer.view_port_offset
+
+            lines = []
+            lines.append(f"Landia: Tag")
+            lines.append("-----------------------------")
+                
+                    
+            renderer.render_text(
+                lines, 
+                x=view_port_resolution[0] + view_port_offset[0]*2, 
+                y=view_port_offset[1],
+                fsize=msg_fsize)
+
 
 class InfectionController(StateController):
 
@@ -401,7 +435,6 @@ class InfectionController(StateController):
             self.content.message_player(p, "Starting Infection Game", 30, clear_messages=True)
 
     def add_player_object(self, obj):
-        print("Calling add obj")
         self.obj_ids.add(obj.get_id())
         obj.add_tag(self.playing_tag)
         obj.remove_tag(self.infected_tag)
@@ -410,7 +443,6 @@ class InfectionController(StateController):
         obj.add_trigger("receive_damage", "infect", self.receive_damage_trigger)
         if p is None:
             obj.default_behavior = PlayingInfection(self)
-            print("assigning behavior")
         if self.started and p is not None:
             self.content.message_player(p, "Joining Infection Game", 30, clear_messages=True)
 
@@ -521,6 +553,24 @@ class InfectionController(StateController):
             if clock.get_ticks()>self.reset_time:
                 self.reset()
 
+    def post_process_frame(self, player: Player, renderer: Renderer):
+        if player.player_type == "admin":
+            msg_fsize = round(renderer.full_resolution[1]/40)
+
+            view_port_resolution =renderer.resolution 
+            view_port_offset = renderer.view_port_offset
+
+            lines = []
+            lines.append(f"Landia: Infection Tag")
+            lines.append("-----------------------------")
+                    
+            renderer.render_text(
+                lines, 
+                x=view_port_resolution[0] + view_port_offset[0]*2, 
+                y=view_port_offset[1],
+                fsize=msg_fsize)
+        
+     
 
 class CTFTeam:
 
@@ -558,11 +608,6 @@ class CTFController(StateController):
             'blue':CTFTeam('blue')
         }
 
-        
-
-        self.game_start_tick = 0
-        self.ticks_per_round = 100 * self.content.step_duration()
-        
         self.playing_tag = "ctf"
 
         self.has_flag_tag = "hasflag"
@@ -570,18 +615,18 @@ class CTFController(StateController):
         self.game_over = False
         self.reset_time=None
         self.reset_delay=10
+        
+        self.ticks_per_round = self.config.get("round_lenght",600) * self.content.step_duration()
+        self.game_start_tick = 0
 
-        self.bot_team_fill = False
+        self.min_team_size = self.config.get("min_team_size",2)
         self.bot_config_id = self.config.get("bot_config_id","monster1")
+        self.disabled_actions = self.config.get("disabled_actions",['jump','grab','craft',"drop"])
+
         self.init_flag_zones()
         self.assign_spawn_points()
-        
-        
         self.player_rewards={}
         self.max_score = self.config.get("max_score",3)
-        
-        for i in range(self.config.get("bot_count",4)):
-            self.add_bot()
         
     def init_flag_zones(self):
         
@@ -649,6 +694,7 @@ class CTFController(StateController):
         clear player events and disable observations
         """
         player.set_data_value("allow_obs", True)
+        player.set_data_value("reset_required", False)
         player.events = []
 
     def init_player(self, player: Player):
@@ -675,9 +721,9 @@ class CTFController(StateController):
             self.setup_player_object(obj)
         return obj
 
-    def add_bot(self):
+    def add_bot(self,team_id=None):
         obj: PhysicalObject = self.content.create_object_from_config_id(self.bot_config_id)
-        self.setup_player_object(obj)
+        self.setup_player_object(obj,team_id=team_id)
         return obj
 
     def setup_player_object(self, obj:AnimateObject, skip_team_assign=False,team_id=None):
@@ -688,7 +734,8 @@ class CTFController(StateController):
         obj.add_trigger("receive_damage", "ctf", self.receive_damage_trigger)
         obj.add_trigger("collision_with", "ctf", self.collision_with_trigger)
         obj.add_trigger("die", "ctf", self.die_trigger)
-        if not skip_team_assign:
+        obj.disabled_actions = self.disabled_actions
+        if team_id is not None or not skip_team_assign:
             team = self.assign_team(obj,team_id)
             flag_zone = gamectx.get_object_by_id(team.flag_zone_id)
             obj.set_data_value("spawn_point",flag_zone.get_position())
@@ -697,6 +744,11 @@ class CTFController(StateController):
             obj.default_behavior = self.behavior_class(self)
         else:
             self.content.message_player(p, "Playing CTF", 30)
+
+    def disable_controller(self):
+        # TODO: remove all changes to objects such as triggers
+        pass
+
 
     def spawn_player_obj(self, obj: AnimateObject, reset=False):
         """
@@ -716,8 +768,12 @@ class CTFController(StateController):
     def spawn_player_objs(self, reset=True):
         for team in self.teams.values():
             for obj_id in team.team_ids:
-                obj = gamectx.get_object_by_id(obj_id)
+                obj:AnimateObject = gamectx.get_object_by_id(obj_id)
                 self.spawn_player_obj(obj, reset)
+                p =  obj.get_player()
+                if reset and p is not None:
+                    self.reset_player(p)
+                    
 
     def remove_from_game(self,obj):
         for team in self.teams.values():
@@ -765,14 +821,18 @@ class CTFController(StateController):
             # Allows drop in players
             self.spawn_player_obj(obj)
 
-        # self.setup_player_object(obj)
 
     def reset(self):
         super().reset()
         self.reset_flags()
         self.spawn_player_objs(reset=True)
-        print("RESET")
+        print("Resetting CTF")
 
+        # Fill with bots
+        for team in self.teams.values():
+            while len(team.team_ids)< self.min_team_size:
+                self.add_bot(team.color)
+                        
        
         self.game_start_tick = clock.get_ticks()
         self.game_over = False
@@ -843,10 +903,12 @@ class CTFController(StateController):
             flag_color = self.get_flag_color(obj2)
             flag_team = self.teams[flag_color]
             if obj.get_id() in flag_team.team_ids:
-                self.reset_flag(flag_color)
-                obj.add_reward(1)
-                self.update_player_reward(obj.get_id(),1)
+                if flag_team.flag_holder_id is not None:
+                    self.reset_flag(flag_color)
+                    obj.add_reward(1)
+                    self.update_player_reward(obj.get_id(),1)
                 return True
+                
             else:
                 obj.get_inventory().add(obj2)
                 
@@ -874,35 +936,45 @@ class CTFController(StateController):
 
     def update(self):
 
+        if clock.get_ticks() > (self.game_start_tick + self.ticks_per_round):
+            print("Out of time, game ending")
+            self.game_over = True
+
         if self.game_over:
             if self.reset_time is None:
                 for team in self.teams.values():
                     for oid in team.team_ids:
                         o:AnimateObject = gamectx.get_object_by_id(oid)
+                        if team.score < self.max_score:
+                            o.add_reward(-2)
+                            self.update_player_reward(oid,-2)
                         p = o.get_player()
                         if p is not None:
                             self.content.message_player(p, "Game Over", 10, clear_messages=True)
                 self.reset_time = clock.get_ticks() + self.reset_delay
             if clock.get_ticks()>self.reset_time:
                 self.reset_time = None
-                self.reset()
+                # self.reset()
+                self.content.request_reset()
 
 
     def get_player_reward(self,obj_id):
         return self.player_rewards.get(obj_id,0)
 
     def post_process_frame(self, player: Player, renderer: Renderer):
-        # if player.player_type != "admin":
-        #     return
+        if player.player_type != "admin":
+            return
         msg_fsize = round(renderer.full_resolution[1]/40)
 
         view_port_resolution =renderer.resolution 
         view_port_offset = renderer.view_port_offset
+
         lines = []
-        lines.append(f"Capture the Flag (max_score:{self.max_score})")
+        lines.append(f"Landia: Capture the Flag")
+        lines.append("-----------------------------")
+        lines.append(f"First to {self.max_score} wins")
         lines.append("")
         for team in self.teams.values():
-            lines.append("-----------------------------")
             lines.append(f"{team.color}: Score {team.score}, Total Wins: {team.wins}")
             for oid in team.team_ids:
                 o:AnimateObject= gamectx.get_object_by_id(oid)

@@ -39,6 +39,7 @@ class LandiaEnv:
                  player_type="default",
                  include_state_observation=False,
                  remote_client=False,
+                 setup_config={},
                  content_overrides={}):
 
         game_def = get_game_def(
@@ -82,6 +83,7 @@ class LandiaEnv:
             is_human=False,
             view_type=view_type,
             include_state_observation=include_state_observation)
+        self.admin_player_def.renderer_config.show_console = False
 
         self.admin_client = GameClient(
             renderer=Renderer(
@@ -93,9 +95,21 @@ class LandiaEnv:
 
         player_def = None
         for agent_id, info in agent_map.items():
+            player_name = info.get("name")
+            skip = info.get("skip",False)
+            if skip:
+                continue
+            team_name = info.get("team_name")
+            role = info.get("role","player")
+            ignore_team_assignments = setup_config.get("ignore_team_assignments",False)
+            if team_name is None or ignore_team_assignments:
+                client_id = agent_id
+            else:
+                client_id = f"{role}?{team_name}_{agent_id}"
             player_def = get_player_def(
                 enable_client=True,
-                client_id=agent_id,
+                client_id=client_id,
+                player_name=player_name,
                 remote_client=remote_client,
                 hostname=hostname,
                 port=port,
@@ -286,6 +300,7 @@ def main():
     parser.add_argument("--remote_client", action="store_true")
     parser.add_argument("--tick_rate", default=0, type=int)
     parser.add_argument("--resolution", default="42x42", type=str)
+    
     parser.add_argument("--log_level", default="info",
                         help=", ".join(list(LOG_LEVELS.keys())), type=str)
 

@@ -132,8 +132,6 @@ class GameMap:
     def get_center(self):
         x = round((self.boundary["x"][1] - self.boundary["x"][0])/2) + self.boundary["x"][0]
         y = round((self.boundary["y"][1] - self.boundary["y"][0])/2)  + self.boundary["y"][0]
-        print(self.boundary)
-        print(f"Size ({x},{y})")
         return (x,y)
         
     def get_size(self):
@@ -157,14 +155,22 @@ class GameMap:
                     coord = (cidx//2, ridx)
                     if coord[0] > xmax:
                         xmax = coord[0]
+                    if coord[0]< xmin:
+                        xmin = coord[0]
                     if coord[1] > ymax:
                         ymax = coord[1]
-
+                    if coord[1]< ymin:
+                        ymin = coord[1]
                     if key in keys:
                         info = self.index.get(key)
                         self.add(coord, info)
 
         if update_boundary:
+            if (xmax - xmin) < 3:
+                xmax += 3
+            if (ymax - ymin) < 3:
+                ymax += 3
+
             self.boundary['x'] = [xmin-1, xmax]
             self.boundary['y'] = [ymin-1, ymax+1]
 
