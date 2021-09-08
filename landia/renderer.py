@@ -21,7 +21,7 @@ import logging
 from .player import Camera
 from .spritesheet import Spritesheet
 from .utils import colormap
-
+import random
 
 
 def scale(vec, vec2):
@@ -38,9 +38,26 @@ class Renderer:
         self.asset_bundle = asset_bundle
         self.config: RendererConfig = config
         self.format = config.format
-        self._display_surf = None
-        self.resolution = self.width, self.height = config.resolution
+        
+        self.view_port_scale = config.view_port_scale
+        self.border_h_offset = config.border_h_offset        
+
+        self._view_port_surf = None
+        self._final_surf = None
+        self.full_resolution = config.resolution
+        self.border_aspect_ratio = (self.full_resolution[0] * 1.0) / self.full_resolution[0]
+        if self.view_port_scale == (1,1):
+            self.resolution = self.width, self.height= self.full_resolution
+            self.view_port_offset = 0,0
+            
+        else:
+            self.width = round(self.full_resolution[0] * self.view_port_scale[0])
+            self.height = round(self.width / self.border_aspect_ratio)* self.view_port_scale[1]
+            self.resolution = self.width,self.height
+            self.view_port_offset= round(self.width*self.border_h_offset),(self.full_resolution[1]- self.height)/2
+
         self.aspect_ratio = (self.width * 1.0) / self.height
+
 
         self.initialized = False
         self.frame_cache = None
@@ -153,9 +170,11 @@ class Renderer:
             flags = pygame.DOUBLEBUF
 
         if self.config.render_to_screen:
-            self._display_surf = pygame.display.set_mode(self.resolution, flags)
+            self._final_surf = pygame.display.set_mode(self.full_resolution, flags)
         else:
-            self._display_surf = pygame.Surface(self.resolution)
+            self._final_surf = pygame.Surface(self.full_resolution)
+
+        self._view_port_surf = pygame.Surface(self.resolution)
         self.load_sounds()
         self.load_images()
         self.play_music("background")
@@ -163,13 +182,17 @@ class Renderer:
 
         self.initialized = True
 
-    def render_to_console(self, lines, x, y, fsize=14, spacing=12, color=(255, 255, 255)):
+    def render_text(self, lines, x, y, fsize=14, spacing=12, color=(255, 255, 255), use_view_port_surface=False):
+
+        surface = self._view_port_surf if use_view_port_surface else self._final_surf
         font = self.font.get(fsize)
+        if fsize>spacing:
+            spacing = fsize
         if font is None:
             font = pygame.font.SysFont("consolas", fsize)
             self.font[fsize] = font
         for i, l in enumerate(lines):
-            self._display_surf.blit(font.render(l, True, color), (x, y + spacing * i))
+            surface.blit(font.render(l, True, color), (x, y + spacing * i))
 
     def _draw_grid_line(self, p1, p2, angle, center, screen_view_center, color, screen_factor):
         p1 = (p1 - center).rotate(angle)
@@ -178,7 +201,7 @@ class Renderer:
 
         p2 = (p2 - center).rotate(angle)
         p2 = scale(screen_factor, (p2)) + screen_view_center
-        pygame.draw.line(self._display_surf,
+        pygame.draw.line(self._final_surf,
                          color,
                          p1,
                          p2,
@@ -208,7 +231,7 @@ class Renderer:
     def draw_rectangle(self, x, y, width, height, color):
         rect = pygame.Rect(x, y, width, height)
         # rect.center = Vector2(x,y)
-        pygame.draw.rect(self._display_surf, color, rect)
+        pygame.draw.rect(self._view_port_surf, color, rect)
 
     def _draw_image(self, pos, center, image_id, angle, screen_factor, screen_view_center, color=(255, 0, 0)):
         image = self.get_scaled_image_by_id(image_id, screen_factor[0], screen_factor[1])
@@ -218,19 +241,25 @@ class Renderer:
                 image = pygame.transform.rotate(image, angle % 360)
             rect = image.get_rect()
             rect.center = image_loc
-            self._display_surf.blit(image, rect)
+            self._view_port_surf.blit(image, rect)
         else:
             rect = pygame.Rect(0, 0, self.config.tile_size * screen_factor[0], self.config.tile_size * screen_factor[1])
             rect.center = image_loc
-            pygame.draw.rect(self._display_surf, color, rect)
-
-    def _draw_infobox(self, infobox, surface:pygame.Surface, screen_factor):
+            pygame.draw.rect(self._view_port_surf, color, rect)
         
-        w,h = surface.get_size()
+    def _draw_infobox(self, infobox, surface:pygame.Surface, screen_factor,size):
+        
+        w,h = size# surface.get_size()
         padding = infobox.get("padding",1) * screen_factor[0]
         rows = len(infobox['value'])
 
-        row_h = round ((h -(padding * (rows +1))) / rows )
+        
+        row_h = infobox.get("row_h")
+        if row_h is not None:
+            row_h = round(row_h * w)
+        else:
+            row_h = round ((h -(padding * (rows +1))) / rows )
+        
         
         x_max = w - padding * 2
         x = padding
@@ -252,8 +281,7 @@ class Renderer:
 
                 surface.blit(font.render(label, True, (200,200,200)), loc)
                 loc = x + twidth,y
-                barw = barw - twidth
-            
+                barw = barw - twidth           
             
             if bg_color is not None:
                 rect = pygame.Rect(loc[0], loc[1],
@@ -304,18 +332,18 @@ class Renderer:
                     self.font[fsize] = font
                 text = renderable['value']
                 twidth,_ = font.size(text)
-                loc = loc[0]+ barw/2 - twidth /2, loc[1]
+                loc =  max(0,loc[0]+ barw/2 - twidth /2), loc[1]
+                color = renderable.get('color',(255,255,255))
 
-                surface.blit(font.render(text, True, (200,200,200)), loc)
+                surface.blit(font.render(text, True, color), loc)
  
 
     def _draw_object(self, center, obj: GObject, screen_angle, screen_factor, screen_view_center, color=None):
 
-        renderables = obj.get_renderables(screen_angle,exclude_info=self.config.exclude_info_box)
+        renderables = obj.get_renderables(screen_angle,info_filter=set(self.config.info_filter))
         for renderable in renderables:
             if renderable.get("type") is "text":
                 fsize = round(3 * screen_factor[0])
-                spacing = 12
                 color = (255, 255, 255)
                 pos = obj.get_view_position() - Vector2(self.config.tile_size/2, self.config.tile_size/2)
                 loc = scale(screen_factor, pos - center) + screen_view_center
@@ -325,22 +353,23 @@ class Renderer:
                     font = pygame.font.SysFont(None, fsize)
                     self.font[fsize] = font
         # for i, l in enumerate(lines):
-                self._display_surf.blit(font.render(renderable.get("value"), True, color), loc)
+                self._view_port_surf.blit(font.render(renderable.get("value"), True, color), loc)
             elif renderable.get("type") is "infobox":
                 boxscale = renderable.get("scale",(1.0,1.0))
                 background_color = renderable.get("background_color",(0,0,0))
                 pos = obj.get_view_position() - Vector2(self.config.tile_size/2, self.config.tile_size/2)
                 loc = scale(screen_factor, pos - center) + screen_view_center
                 size = (self.config.tile_size * screen_factor[0] * boxscale[0],self.config.tile_size * screen_factor[1] * boxscale[1])                
-                surface = pygame.Surface(size)
+                surface_size = size[0]*2,size[1]*2
+                surface = pygame.Surface(surface_size)
 
                 if background_color is None:
                     surface.set_colorkey((0,0,0))
                 else:               
                     surface.fill(background_color)
-                self._draw_infobox(renderable, surface=surface, screen_factor=screen_factor)
+                self._draw_infobox(renderable, surface=surface, screen_factor=screen_factor,size = size)
 
-                self._display_surf.blit(surface,loc)
+                self._view_port_surf.blit(surface,loc)
 
             elif renderable.get("type") is "bar":
                 color = renderable.get("color")
@@ -354,14 +383,14 @@ class Renderer:
                                    barw,
                                    barh)
 
-                pygame.draw.rect(self._display_surf, bg_color, rect)
+                pygame.draw.rect(self._view_port_surf, bg_color, rect)
                 width = round(barw * renderable.get("value"))
                 # Bar
                 rect = pygame.Rect(loc[0], loc[1],
                                    width,
                                    barh)
 
-                pygame.draw.rect(self._display_surf, color, rect)
+                pygame.draw.rect(self._view_port_surf, color, rect)
             elif renderable.get("type") is "tag":
                 color = renderable.get("color")
                 index = renderable.get("index",0)
@@ -376,7 +405,7 @@ class Renderer:
                                    tw,
                                    th)
 
-                pygame.draw.rect(self._display_surf, color, rect)            
+                pygame.draw.rect(self._view_port_surf, color, rect)            
             else:
                 position = renderable['position']
                 image_id = renderable['image_id']
@@ -416,7 +445,7 @@ class Renderer:
                     self.background_center[1] - center.y),
             screen_factor) + screen_view_center
         rect.center = image_loc
-        self._display_surf.blit(image, rect)
+        self._view_port_surf.blit(image, rect)
 
     def check_bounds(self, cv, cs, bv, bs):
         return ((bv - bs/2) >= (cv - cs/2)) or ((bv+bs/2) <= (cv + cs/2))
@@ -487,7 +516,8 @@ class Renderer:
             self.initialize()
 
         # import pdb;pdb.set_trace()
-        self._display_surf.fill((0, 0, 0))
+        self._view_port_surf.fill((0, 0, 0))
+        self._final_surf.fill((0, 0, 0))
 
         angle = 0
         camera: Camera = None
@@ -536,30 +566,31 @@ class Renderer:
                 self._draw_object(center, obj, angle, screen_factor, screen_view_center, obj.shape_color)
 
         if self.debug:
-            pygame.draw.rect(self._display_surf,
+            pygame.draw.rect(self._view_port_surf,
                              (0, 250, 250),
                              pygame.Rect(center.x + self.width/2, center.y+self.height/2, 5, 5))
 
-            pygame.draw.rect(self._display_surf,
+            pygame.draw.rect(self._view_port_surf,
                              (255, 255, 50),
                              pygame.Rect(self.width/2, self.height/2, 5, 5))
 
-    def stack_surface(self,surface,loc=(0,0)):
-        self._display_surf.blit(surface,loc)
 
     def render_frame(self):
+        
+        self._final_surf.blit(self._view_port_surf,self.view_port_offset)
         self.fps_clock.tick()
         if self.config.save_observation:
             self.get_last_frame()
         frame = self.frame_cache
         self.frame_cache = None
+        
         if self.config.render_to_screen:
             pygame.display.flip()
         return frame
 
     def get_last_frame(self):
 
-        img_st = pygame.image.tostring(self._display_surf, self.format)
+        img_st = pygame.image.tostring(self._final_surf, self.format)
         data = Image.frombytes(self.format, self.config.resolution, img_st)
         np_data = np.array(data)
 

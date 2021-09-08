@@ -69,11 +69,11 @@ class LandiaEnv:
 
         self.admin_player_def = get_player_def(
             enable_client=False,
-            client_id=None,
+            client_id="admin",
             remote_client=remote_client,
             hostname=hostname,
             port=port,
-            resolution=[640, 480],
+            resolution=[1280, 720],
             fps=tick_rate,
             sound_enabled=False,
             render_shapes=render_shapes,
@@ -92,7 +92,7 @@ class LandiaEnv:
         self.admin_client.renderer.initialize()
 
         player_def = None
-        for agent_id, agent_info in agent_map.items():
+        for agent_id, info in agent_map.items():
             player_def = get_player_def(
                 enable_client=True,
                 client_id=agent_id,

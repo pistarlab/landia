@@ -60,6 +60,7 @@ def get_player_def(
         hostname,
         port,
         player_type,
+        player_name=None,
         resolution=None,
         fps=None,
         render_shapes=None,
@@ -78,7 +79,7 @@ def get_player_def(
 
     player_def.client_config.player_type = player_type
     player_def.client_config.client_id = client_id
-
+    player_def.client_config.player_name=player_name
     player_def.client_config.enabled = enable_client
     player_def.client_config.server_hostname = hostname
     player_def.client_config.server_port = port
@@ -98,6 +99,15 @@ def get_player_def(
     player_def.renderer_config.enable_resize = enable_resize
     player_def.renderer_config.render_to_screen = render_to_screen
     player_def.renderer_config.disable_hud = disable_hud
+    
+    if player_type == "admin":
+        player_def.renderer_config.view_port_scale = 0.7,0.7
+        player_def.renderer_config.border_h_offset = 0.02
+        player_def.renderer_config.info_filter = set(['label'])
+    # else:
+    #     player_def.renderer_config.view_port_scale = (0.7,0.7)
+    #     player_def.renderer_config.border_h_offset = 0
+    #     player_def.renderer_config.info_filter = set(['label'])
     return player_def
 
 def get_arguments(override_args=None):
@@ -124,6 +134,7 @@ def get_arguments(override_args=None):
     parser.add_argument("--show_console", action="store_true", help="Show on screen info")
     parser.add_argument("--disable_hud", action="store_true", help="Disable all screen printing")
     parser.add_argument("--enable_resize", action="store_true", help="Enable Screen Resize")
+    parser.add_argument("--player_name",help="player name")
 
     # used for both client and server
     parser.add_argument("--port", default=10001, help="the port the server is running on")
@@ -183,9 +194,13 @@ def run(args):
         res_string = args.resolution.split("x")
         resolution = (int(res_string[0]), int(res_string[1]))
 
+    # player_meta_st = f"{{{args.player_meta}}}"
+    # print(player_meta_st)
+    # player_meta = json.loads( player_meta_st)
+            
     player_def = get_player_def(
         enable_client=args.enable_client,
-        client_id=args.client_id,
+        client_id=str(args.client_id),
         remote_client=args.remote_client,
         hostname=args.hostname,
         port=args.port,
@@ -200,7 +215,8 @@ def run(args):
         sound_enabled= not args.disable_sound,
         show_console= args.show_console,
         enable_resize = args.enable_resize,
-        disable_hud = args.disable_hud
+        disable_hud = args.disable_hud,
+        player_name=args.player_name
     )
 
     content: Content = load_game_content(game_def)

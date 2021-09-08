@@ -53,7 +53,7 @@ class Content:
         raise NotImplementedError()
 
     @abstractmethod
-    def new_player(self, client_id, player_id=None, player_type = None, is_human=None) -> Player:
+    def new_player(self, client_id, player_id=None, player_type = None, is_human=None,name=None) -> Player:
         """
         creates a new player, called when client connects to server
         """

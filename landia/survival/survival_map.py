@@ -130,8 +130,10 @@ class GameMap:
         return [((xs[i], ys[i])) for i in range(num)]
 
     def get_center(self):
-        x = (self.boundary["x"][1] - self.boundary["x"][0])/2
-        y = (self.boundary["y"][1] - self.boundary["y"][0])/2
+        x = round((self.boundary["x"][1] - self.boundary["x"][0])/2) + self.boundary["x"][0]
+        y = round((self.boundary["y"][1] - self.boundary["y"][0])/2)  + self.boundary["y"][0]
+        print(self.boundary)
+        print(f"Size ({x},{y})")
         return (x,y)
         
     def get_size(self):
@@ -209,14 +211,6 @@ class GameMap:
         for coord, item_list in sector.items.items():
             for info in item_list:
                 self.load_obj_from_info(info, coord)
-
-    # def add_spawn_point(self, id, pos):
-    #     pos_list = self.get_spawn_points(id)
-    #     pos_list.append(pos)
-    #     self.spawn_points[id] = pos_list
-
-    # def get_spawn_points(self, id):
-    #     return self.spawn_points.get(id, [])
 
     def load_obj_from_info(self, info, coord):
         

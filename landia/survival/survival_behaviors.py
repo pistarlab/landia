@@ -7,6 +7,18 @@ from .survival_objects import AnimateObject, PhysicalObject
 from landia.clock import clock
 import random
 
+
+def get_blocking_object(obj,direction)->PhysicalObject:
+    target_pos = obj.get_position() + (direction * gamectx.content.tile_size)
+    target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
+    blocking_obj:PhysicalObject = None
+    for oid in gamectx.physics_engine.space.get_objs_at(target_coord):
+        if oid is not None:
+            blocking_obj = gamectx.object_manager.get_by_id(oid)
+            if blocking_obj.collision_type == 1:
+                return blocking_obj
+    return None
+
 class FollowAnimals(Behavior):
 
 
@@ -130,6 +142,9 @@ class PlayingInfection(Behavior):
         
         self.last_freq = 0
         self.check_freq = 100
+        self.last_move_blocked=False
+        self.last_move_direction = None
+        self.last_explore_direction = random.choice([-1,1])
 
 
     def find_closest_object(self,obj,find_infected=True):
@@ -185,14 +200,20 @@ class PlayingInfection(Behavior):
         if mag <= gamectx.content.tile_size and new_angle == normalize_angle(obj.angle):
             obj.use()
         else:
-            # TODO: Create path logging algo. Mark bad deadends and don't use and backtrack
-            # target_pos = obj.get_position() + (direction * gamectx.content.tile_size)
-            # target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
-            # blocked = False
-            # for oid in gamectx.physics_engine.space.get_objs_at(target_coord):
-            #     if oid != self.following_obj.get_id():
-            #         blocking_obj = gamectx.object_manager.get_by_id(oid)
-            #         blocked = True
+            # if self.last_move_blocked:
+            #     direction = self.last_move_direction.rotate(90 * self.last_explore_direction)    
+            #     new_angle = normalize_angle(Vector2(0, 1).angle_to(direction))
+
+            # blocking_obj = get_blocking_object(obj,direction)
+
+            # if blocking_obj != None:
+            #     if not self.last_move_blocked and random.random() > 0.9:
+            #         self.last_explore_direction *=-1
+            #     self.last_move_blocked = True
+            #     self.last_move_direction = direction
+            # else:
+            #     self.last_move_blocked = False
+            #     self.last_move_direction = direction
             obj.walk(direction, new_angle)
 
 
@@ -229,36 +250,14 @@ class PlayingCTF(Behavior):
         self.last_move_blocked=False
         self.last_move_direction = None
         self.last_explore_direction = random.choice([-1,1])
-
-
-    # def find_closest_object(self,obj,find_infected=True):
-    #     objs = []
-    #     closest_distance = None
-    #     closest_obj = None
-    #     for obj2 in self.controller.get_objects():
-    #         if find_infected:
-    #             # if looking for infected, then skip those not infected
-    #             if not self.controller.infected_tag in obj2.tags:
-    #                 continue
-    #         else:
-    #             # if looking for those NOT infected, then skip those infected
-    #             if self.controller.infected_tag in obj2.tags:
-    #                 continue
-            
-    #         if  obj.get_id() != obj2.get_id() and obj2.get_id() in self.controller.obj_ids and obj2.get_position() is not None:
-    #             distance = obj2.get_position().distance_to(obj.get_position())
-    #             objs.append((obj2,distance))
-    #             if closest_obj is None or closest_distance > distance:
-    #                 closest_obj = obj2
-    #                 closest_distance = distance
-
-    #     return closest_obj
+        self.attacking = False
 
 
     def follow_obj(self,obj:AnimateObject,target_obj:PhysicalObject):
 
         orig_direction: Vector2 = target_obj.get_position() - obj.get_position()
-        if self.last_move_blocked:
+
+        if not self.attacking and self.last_move_blocked and random.random()>0.9:
             direction = self.last_move_direction.rotate(90 * self.last_explore_direction)
  
             new_angle = normalize_angle(Vector2(0, 1).angle_to(direction))
@@ -266,23 +265,29 @@ class PlayingCTF(Behavior):
             direction = normalized_direction(orig_direction)
             new_angle = normalize_angle(Vector2(0, 1).angle_to(direction))
 
-        target_pos = obj.get_position() + (direction * gamectx.content.tile_size)
-        target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
-        blocked = False
-        for oid in gamectx.physics_engine.space.get_objs_at(target_coord):
-            if oid is not None:
-                blocking_obj:PhysicalObject = gamectx.object_manager.get_by_id(oid)
-                if blocking_obj.collision_type == 1:
-                    blocked = True
-                    break
-        if blocked:
-            if not self.last_move_blocked and random.random() > 0.9:
+        blocking_obj = get_blocking_object(obj,direction)
+
+        if blocking_obj != None:
+            if not self.last_move_blocked and random.random() > 0.8:
                 self.last_explore_direction *=-1
+                
+            team = self.controller.get_opponents_team(obj, blocking_obj)
+            if team is not None and random.random()>0.2:
+                if not self.attacking:
+                    obj.walk(direction, new_angle)
+                    self.attacking = True
+                else:
+                    obj.unarmed_attack()
+            else:
+                self.attacking = False
+   
             self.last_move_blocked = True
             self.last_move_direction = direction
         else:
             self.last_move_blocked = False
             self.last_move_direction = direction
+            self.attacking = False
+            
             obj.walk(direction, new_angle)
 
     def get_other_teams_flag(self,obj:AnimateObject):
@@ -293,8 +298,6 @@ class PlayingCTF(Behavior):
         else:
             flag_holder = gamectx.get_object_by_id(other_team.flag_holder_id)
             self.follow_obj(obj,target_obj=flag_holder)
-
-
 
     def capture_other_teams_flag(self,obj):
         team = self.controller.get_team(obj)

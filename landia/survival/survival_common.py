@@ -1,4 +1,5 @@
 from abc import abstractclassmethod, abstractmethod
+from landia.renderer import Renderer
 from landia.player import Player
 from typing import Dict, List, Any
 from landia.common import Base
@@ -127,6 +128,9 @@ class StateController(Base):
         pass
 
     def update(self):
+        pass
+    
+    def post_process_frame(self,player:Player,renderer:Renderer):
         pass
 
 

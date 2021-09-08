@@ -14,6 +14,8 @@ class RendererConfig(Base):
     def __init__(self):
         self.render_delay_in_ms = 0
         self.resolution = (640,480)
+        self.view_port_scale = (1,1)
+        self.border_h_offset = 0
         self.format='RGB'
         self.save_observation=False
         self.render_shapes = False
@@ -27,7 +29,7 @@ class RendererConfig(Base):
         self.view_type = 0
         self.debug_render_bodies = False
         self.enable_resize = False
-        self.exclude_info_box = True
+        self.info_filter = set()
 
 def __repr__(self) -> str:
     return pprint.pformat(self.__dict__)
@@ -38,6 +40,7 @@ class ClientConfig(Base):
         self.is_remote = True
         self.frames_per_second = 60
         self.is_human = True
+        self.player_name = None
         self.player_type = "default"
         self.client_id = None
         self.server_hostname = None

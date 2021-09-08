@@ -17,12 +17,13 @@ class Player(Base):
         player.client_id = data['client_id']
         player.player_type = data['player_type']
         player.data = data.get('data',{})
-        
+        player.name = data.get('name')
+
         if data['camera'] :
             player.camera = Camera(**data['camera']['data'])
         return player
 
-    def __init__(self, client_id=None, uid=None, data=None, player_type ="default", camera=None, is_human=False):
+    def __init__(self, client_id=None, uid=None, data=None, player_type ="default", camera=None, is_human=False,name=None):
         """
         :return:
         """
@@ -34,6 +35,9 @@ class Player(Base):
         self.is_human = is_human
         self.events=[]
         self.data = {} if data is None else data
+        if name is None:
+            name = self.client_id if "?" not in self.client_id else self.client_id.split("?")[1].split("_")[1]
+        self.name = name
 
     def get_id(self):
         return self.uid    
@@ -71,3 +75,4 @@ class Player(Base):
 
     def __repr__(self):
         return "Player: {}, Type: {}".format(self.uid,self.player_type)
+        

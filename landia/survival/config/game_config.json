@@ -11,8 +11,8 @@
         }
     },
     "active_controllers": [
-
-        "ctf"
+"ctf"
+       
     ],
     "controllers": {
         "pspawn": {
@@ -236,7 +236,7 @@
                 "low_energy_health_penalty":2,
                 "disabled_actions": [],
                 "attack_strength": 60,
-                
+                "walk_speed": 1.4,
                 "show_info_bar": true,
                 "start_inventory": {
                     "wall1": 4
@@ -251,7 +251,9 @@
         "monster1": {
             "class": "Monster",
             "config": {
-                "show_info_bar": true
+                "show_info_bar": true,
+                "attack_strength": 60,
+                "walk_speed": 1.1
             }
         },
         "apple1": {
@@ -307,14 +309,16 @@
             "class": "PhysicalObject",
             "config": {
                 "collision_type": 0,
-                "collectable": false
+                "collectable": false,
+                "model_id":"white_flag"
             }
         },
         "flag_zone": {
             "class": "PhysicalObject",
             "config": {
                 "collision_type": 0,
-                "collectable": false
+                "collectable": false,
+                "model_id":"white_box"
             }
         },
         "spawn_point": {

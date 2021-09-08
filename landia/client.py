@@ -159,6 +159,7 @@ class ClientConnector:
     def create_request(self):
         request_info = {
             'client_id': "" if self.client_id is None else self.client_id,
+            "meta": self.config.meta,
             'snapshots_received': self.last_received_snapshots,
             'player_type': self.config.player_type,
             'is_human': self.config.is_human,
@@ -277,7 +278,8 @@ class GameClient:
             self.player = self.content.new_player(
                 client_id=config.client_id,
                 player_type=config.player_type,
-                is_human=self.config.is_human)
+                is_human=self.config.is_human,
+                name=self.config.player_name)
 
     def send_local_events(self):
         event_snapshot = gamectx.event_manager.get_client_snapshot()

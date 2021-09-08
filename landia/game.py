@@ -145,13 +145,13 @@ class GameContext:
             self.event_manager.load_snapshot(snapshot['em'])
 
     # Player Methods
-    def get_player(self, client, player_type, is_human):
+    def get_player(self, client, player_type, is_human,name=None):
         """
         Get existing player or create new one
         """
         if client.player_id is None:
             player = self.content.new_player(
-                client.id, player_id=None, player_type=player_type, is_human=is_human)
+                client.id, player_id=None, player_type=player_type, is_human=is_human,name=name)
             client.player_id = player.get_id()
         else:
             player = self.player_manager.get_player(client.player_id)
