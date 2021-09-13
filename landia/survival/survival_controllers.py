@@ -1,4 +1,3 @@
-
 from typing import List
 import random
 from landia.common import Base, Vector2
@@ -11,8 +10,8 @@ from landia.renderer import Renderer
 from landia import gamectx
 import logging
 
-class PlayerSpawnController(StateController):
 
+class PlayerSpawnController(StateController):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.content: SurvivalContent = gamectx.content
@@ -40,9 +39,11 @@ class PlayerSpawnController(StateController):
             player_object = gamectx.object_manager.get_by_id(player.get_object_id())
         else:
             # TODO: get playertype from game mode + client config
-            player_config = self.content.get_game_config()['player_types']['default']
-            config_id = player_config['config_id']
-            player_object: PhysicalObject = self.content.create_object_from_config_id(config_id)
+            player_config = self.content.get_game_config()["player_types"]["default"]
+            config_id = player_config["config_id"]
+            player_object: PhysicalObject = self.content.create_object_from_config_id(
+                config_id
+            )
             player_object.set_player(player)
 
         if reset:
@@ -61,71 +62,8 @@ class PlayerSpawnController(StateController):
         for player in gamectx.player_manager.get_players_by_types(type_set={"default"}):
             self.spawn_player(player, reset)
 
-# class PlayerSpawnController(StateController):
-#     """
-#     Rename to character/agent/actor spawner?
-#     """
-
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.content: SurvivalContent = gamectx.content
-#         self.obj_list = []
-#         self.required_count = 1
-#         self.started = False
-
-#     def reset_player(self, player: Player):
-#         player.set_data_value("reset_required", False)
-#         player.set_data_value("allow_obs", True)
-#         player.events = []
-
-#     def reset(self):
-#         super().reset()
-#         self.spawn_objs(reset=True)
-
-#     def update(self):
-#         if self.is_ready_to_start():
-#             self.reset()
-
-#     def is_ready_to_start(self):
-#         return not self.started and len(self.obj_list) >= self.required_count
-
-#     def join(self, player):
-#         obj = self.create_player_object(player)
-#         if self.started:
-#             # Allows drop in players
-#             self.spawn_obj(obj)
-            
-#     def create_player_object(self, player: Player, reset=False):
-#         player_config = self.content.get_game_config()['player_types']['default']
-#         config_id = player_config['config_id']
-#         obj: PhysicalObject = self.content.create_object_from_config_id(config_id)
-#         obj.set_player(player)
-#         self.obj_list.append(obj)
-#         return obj
-        
-#     def spawn_obj(self, obj: AnimateObject, reset=False):
-
-#         player = obj.get_player()
-
-#         if player != None and reset:
-#             self.reset_player(player)
-
-#         spawn_point = obj.get_data_value("spawn_point")
-#         if spawn_point is None:
-#             spawn_point = self.content.get_available_location()
-#         if spawn_point is None:
-#             logging.error("No spawnpoint available")
-
-#         obj.spawn(spawn_point)
-#         return obj
-
-#     def spawn_objs(self, reset=True):
-#         for obj in self.obj_list:
-#             self.spawn_obj(obj, reset)
-
 
 class ObjectCollisionController(StateController):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.content: SurvivalContent = gamectx.content
@@ -161,7 +99,6 @@ class ObjectCollisionController(StateController):
 
 
 class FoodCollectController(StateController):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.content: SurvivalContent = gamectx.content
@@ -238,8 +175,6 @@ class FoodCollectController(StateController):
             objs.append(obj)
         # self.spawn_food()
 
-
-
     def update(self):
         time_since = clock.get_ticks() - self.last_check
         if time_since > self.check_freq:
@@ -250,23 +185,24 @@ class FoodCollectController(StateController):
 
     def post_process_frame(self, player: Player, renderer: Renderer):
         if player.player_type == "admin":
-            msg_fsize = round(renderer.full_resolution[1]/40)
+            msg_fsize = round(renderer.full_resolution[1] / 40)
 
-            view_port_resolution =renderer.resolution 
+            view_port_resolution = renderer.resolution
             view_port_offset = renderer.view_port_offset
 
             lines = []
             lines.append(f"Landia: Forage")
             lines.append("-----------------------------")
-                    
+
             renderer.render_text(
-                lines, 
-                x=view_port_resolution[0] + view_port_offset[0]*2, 
+                lines,
+                x=view_port_resolution[0] + view_port_offset[0] * 2,
                 y=view_port_offset[1],
-                fsize=msg_fsize)
+                fsize=msg_fsize,
+            )
+
 
 class TagController(StateController):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.content: SurvivalContent = gamectx.content
@@ -336,7 +272,9 @@ class TagController(StateController):
 
         print("Trying to tag")
         direction = Vector2(0, 1).rotate(source_obj.angle)
-        target_pos = source_obj.get_position() + (direction * source_obj._l_content.tile_size)
+        target_pos = source_obj.get_position() + (
+            direction * source_obj._l_content.tile_size
+        )
         target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
 
         target_obj = None
@@ -373,25 +311,24 @@ class TagController(StateController):
 
     def post_process_frame(self, player: Player, renderer: Renderer):
         if player.player_type == "admin":
-            msg_fsize = round(renderer.full_resolution[1]/40)
+            msg_fsize = round(renderer.full_resolution[1] / 40)
 
-            view_port_resolution =renderer.resolution 
+            view_port_resolution = renderer.resolution
             view_port_offset = renderer.view_port_offset
 
             lines = []
             lines.append(f"Landia: Tag")
             lines.append("-----------------------------")
-                
-                    
+
             renderer.render_text(
-                lines, 
-                x=view_port_resolution[0] + view_port_offset[0]*2, 
+                lines,
+                x=view_port_resolution[0] + view_port_offset[0] * 2,
                 y=view_port_offset[1],
-                fsize=msg_fsize)
+                fsize=msg_fsize,
+            )
 
 
 class InfectionController(StateController):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.content: SurvivalContent = gamectx.content
@@ -426,13 +363,14 @@ class InfectionController(StateController):
         else:
             print("Players obj not found")
 
-
-    def reset_player_object(self,obj):
+    def reset_player_object(self, obj):
         obj.add_tag(self.playing_tag)
         obj.remove_tag(self.infected_tag)
         p = obj.get_player()
         if p is not None:
-            self.content.message_player(p, "Starting Infection Game", 30, clear_messages=True)
+            self.content.message_player(
+                p, "Starting Infection Game", 30, clear_messages=True
+            )
 
     def add_player_object(self, obj):
         self.obj_ids.add(obj.get_id())
@@ -444,14 +382,14 @@ class InfectionController(StateController):
         if p is None:
             obj.default_behavior = PlayingInfection(self)
         if self.started and p is not None:
-            self.content.message_player(p, "Joining Infection Game", 30, clear_messages=True)
-
+            self.content.message_player(
+                p, "Joining Infection Game", 30, clear_messages=True
+            )
 
     def add_bot(self):
         obj: PhysicalObject = self.content.create_object_from_config_id("monster1")
-        
-        return obj
 
+        return obj
 
     def reset(self):
         super().reset()
@@ -474,8 +412,6 @@ class InfectionController(StateController):
                 self.reset_player_object(obj)
             else:
                 self.add_player_object(obj)
-
-        
 
         # Select Who is "it"
         obj = random.choice(objs)
@@ -501,13 +437,19 @@ class InfectionController(StateController):
             return True
 
         direction = Vector2(0, 1).rotate(source_obj.angle)
-        target_pos = source_obj.get_position() + (direction * source_obj._l_content.tile_size)
+        target_pos = source_obj.get_position() + (
+            direction * source_obj._l_content.tile_size
+        )
         target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
 
         target_obj = None
         for oid in gamectx.physics_engine.space.get_objs_at(target_coord):
             obj2: PhysicalObject = gamectx.object_manager.get_by_id(oid)
-            if obj2.collision_type > 0 and self.playing_tag in obj2.tags and not self.infected_tag in obj2.tags:
+            if (
+                obj2.collision_type > 0
+                and self.playing_tag in obj2.tags
+                and not self.infected_tag in obj2.tags
+            ):
                 target_obj = obj2
                 break
 
@@ -539,105 +481,108 @@ class InfectionController(StateController):
                     obj.add_reward(10)
                 else:
                     obj.add_reward(-2)
-            self.game_over= True
-            
+            self.game_over = True
 
         if self.game_over:
             if self.reset_time is None:
                 for oid in self.obj_ids:
-                    o:AnimateObject = gamectx.get_object_by_id(oid)
+                    o: AnimateObject = gamectx.get_object_by_id(oid)
                     p = o.get_player()
                     if p is not None:
-                        self.content.message_player(p, "Game Over", 10, clear_messages=True)
+                        self.content.message_player(
+                            p, "Game Over", 10, clear_messages=True
+                        )
                 self.reset_time = clock.get_ticks() + self.reset_delay
-            if clock.get_ticks()>self.reset_time:
+            if clock.get_ticks() > self.reset_time:
                 self.reset()
 
     def post_process_frame(self, player: Player, renderer: Renderer):
         if player.player_type == "admin":
-            msg_fsize = round(renderer.full_resolution[1]/40)
+            msg_fsize = round(renderer.full_resolution[1] / 40)
 
-            view_port_resolution =renderer.resolution 
+            view_port_resolution = renderer.resolution
             view_port_offset = renderer.view_port_offset
 
             lines = []
             lines.append(f"Landia: Infection Tag")
             lines.append("-----------------------------")
-                    
+
             renderer.render_text(
-                lines, 
-                x=view_port_resolution[0] + view_port_offset[0]*2, 
+                lines,
+                x=view_port_resolution[0] + view_port_offset[0] * 2,
                 y=view_port_offset[1],
-                fsize=msg_fsize)
-        
-     
+                fsize=msg_fsize,
+            )
+
 
 class CTFTeam:
-
-    def __init__(self,color):
+    def __init__(self, color):
         self.color = color
         self.flag_id = None
         self.flag_zone_id = None
         self.flag_holder_id = None
+        self.flag_at_home = True
         self.team_ids = set()
 
         self.spawn_points = []
         self.score = 0
         self.wins = 0
-    
+
     def get_team_tag(self):
         return f"{self.color}team"
 
-    def remove_player_obj_id(self,id):
+    def remove_player_obj_id(self, id):
         if self.flag_holder_id == id:
             self.flag_holder_id = None
         self.team_ids.discard(id)
 
-        
 
 class CTFController(StateController):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
         self.content: SurvivalContent = gamectx.content
         self.behavior_class = PlayingCTF
 
-        self.teams={
-            'red':CTFTeam('red'),
-            'blue':CTFTeam('blue')
-        }
+        self.teams = {"red": CTFTeam("red"), "blue": CTFTeam("blue")}
 
         self.playing_tag = "ctf"
 
         self.has_flag_tag = "hasflag"
-        self.tags_used = set([self.playing_tag, self.has_flag_tag] + [t.get_team_tag() for t in self.teams.values()])
+        self.tags_used = set(
+            [self.playing_tag, self.has_flag_tag]
+            + [t.get_team_tag() for t in self.teams.values()]
+        )
         self.game_over = False
-        self.reset_time=None
-        self.reset_delay=10
-        
-        self.ticks_per_round = self.config.get("round_lenght",600) * self.content.step_duration()
+        self.reset_time = None
+        self.reset_delay = 10
+
+        self.ticks_per_round = (
+            self.config.get("round_lenght", 200) * self.content.step_duration()
+        )
         self.game_start_tick = 0
 
-        self.min_team_size = self.config.get("min_team_size",2)
-        self.bot_config_id = self.config.get("bot_config_id","monster1")
-        self.disabled_actions = self.config.get("disabled_actions",['jump','grab','craft',"drop"])
+        self.min_team_size = self.config.get("min_team_size", 2)
+        self.bot_config_id = self.config.get("bot_config_id", "monster1")
+        self.disabled_actions = self.config.get(
+            "disabled_actions", ["jump", "grab", "craft", "drop"]
+        )
 
         self.init_flag_zones()
         self.assign_spawn_points()
-        self.player_rewards={}
-        self.max_score = self.config.get("max_score",3)
-        
-    def init_flag_zones(self):
-        
-        flag_zones= gamectx.object_manager.get_objects_by_config_id("flag_zone")
+        self.player_rewards = {}
+        self.max_score = self.config.get("max_score", 3)
 
-        for zone, team in zip(flag_zones,self.teams.values()):
+    def init_flag_zones(self):
+
+        flag_zones = gamectx.object_manager.get_objects_by_config_id("flag_zone")
+
+        for zone, team in zip(flag_zones, self.teams.values()):
             zone.model_id = f"{team.color}_flag_zone"
             team.flag_zone_id = zone.get_id()
 
-    def update_player_reward(self,obj_id, reward):
-        reward = self.player_rewards.get(obj_id,0) + reward
+    def update_player_reward(self, obj_id, reward):
+        reward = self.player_rewards.get(obj_id, 0) + reward
         self.player_rewards[obj_id] = reward
 
     def assign_spawn_points(self):
@@ -654,16 +599,15 @@ class CTFController(StateController):
                     cteam = team
                     czone = zone
             if cteam is not None:
-                cteam.spawn_points.append(spawn_point)     
+                cteam.spawn_points.append(spawn_point)
 
-
-    def assign_to_team(self,obj,color):
+    def assign_to_team(self, obj, color):
         team = self.teams.get(color)
         obj.add_tag(team.get_team_tag())
         team.team_ids.add(obj.get_id())
         return team
 
-    def get_team(self,obj):
+    def get_team(self, obj):
         for team in self.teams.values():
             if obj.get_id() in team.team_ids:
                 return team
@@ -674,20 +618,20 @@ class CTFController(StateController):
             self.reset_flag(team.color)
             team.score = 0
 
-
-    def reset_flag(self,color):
+    def reset_flag(self, color):
         team = self.teams.get(color)
 
         flag_zone = gamectx.get_object_by_id(team.flag_zone_id)
-        
-        if team.flag_id is None:      
-            flag = self.content.create_object_from_config_id('flag')
+
+        if team.flag_id is None:
+            flag = self.content.create_object_from_config_id("flag")
             flag.model_id = f"{color}_flag"
             team.flag_id = flag.get_id()
         else:
             flag = gamectx.get_object_by_id(team.flag_id)
-        
+
         flag.spawn(flag_zone.get_position())
+        team.flag_at_home = True
 
     def reset_player(self, player: Player):
         """
@@ -703,30 +647,34 @@ class CTFController(StateController):
         """
         obj: PhysicalObject = None
         if player.get_object_id() is None:
-            player_config = self.content.get_game_config()['player_types']['default']
-            config_id = player_config['config_id']
+            player_config = self.content.get_game_config()["player_types"]["default"]
+            config_id = player_config["config_id"]
             obj: PhysicalObject = self.content.create_object_from_config_id(config_id)
             obj.set_player(player)
         else:
             obj = gamectx.get_object_by_id(player.get_object_id())
-            
+
         self.reset_player(player)
-        
+
         if "?" in player.client_id:
             player_role, team_info = player.client_id.split("?")
             team_id, player_id = team_info.split("_")
-            self.setup_player_object(obj,team_id=team_id)
+            self.setup_player_object(obj, team_id=team_id)
 
         else:
             self.setup_player_object(obj)
         return obj
 
-    def add_bot(self,team_id=None):
-        obj: PhysicalObject = self.content.create_object_from_config_id(self.bot_config_id)
-        self.setup_player_object(obj,team_id=team_id)
+    def add_bot(self, team_id=None):
+        obj: PhysicalObject = self.content.create_object_from_config_id(
+            self.bot_config_id
+        )
+        self.setup_player_object(obj, team_id=team_id)
         return obj
 
-    def setup_player_object(self, obj:AnimateObject, skip_team_assign=False,team_id=None):
+    def setup_player_object(
+        self, obj: AnimateObject, skip_team_assign=False, team_id=None
+    ):
         """
         Setup Player object
         """
@@ -736,10 +684,10 @@ class CTFController(StateController):
         obj.add_trigger("die", "ctf", self.die_trigger)
         obj.disabled_actions = self.disabled_actions
         if team_id is not None or not skip_team_assign:
-            team = self.assign_team(obj,team_id)
+            team = self.assign_team(obj, team_id)
             flag_zone = gamectx.get_object_by_id(team.flag_zone_id)
-            obj.set_data_value("spawn_point",flag_zone.get_position())
-        p:Player = obj.get_player()
+            obj.set_data_value("spawn_point", flag_zone.get_position())
+        p: Player = obj.get_player()
         if p is None:
             obj.default_behavior = self.behavior_class(self)
         else:
@@ -748,7 +696,6 @@ class CTFController(StateController):
     def disable_controller(self):
         # TODO: remove all changes to objects such as triggers
         pass
-
 
     def spawn_player_obj(self, obj: AnimateObject, reset=False):
         """
@@ -768,27 +715,29 @@ class CTFController(StateController):
     def spawn_player_objs(self, reset=True):
         for team in self.teams.values():
             for obj_id in team.team_ids:
-                obj:AnimateObject = gamectx.get_object_by_id(obj_id)
+                obj: AnimateObject = gamectx.get_object_by_id(obj_id)
                 self.spawn_player_obj(obj, reset)
-                p =  obj.get_player()
+                p = obj.get_player()
                 if reset and p is not None:
                     self.reset_player(p)
-                    
+                self.remove_flag_from_player_obj(obj)
 
-    def remove_from_game(self,obj):
+    def remove_from_game(self, obj):
         for team in self.teams.values():
             team.remove_player_obj_id(obj.get_id())
             obj.remove_tag(team.get_team_tag())
-        
-    def assign_team(self,obj:PhysicalObject,team_id=None):
-        self.remove_from_game(obj)       
+
+    def assign_team(self, obj: PhysicalObject, team_id=None):
+        self.remove_from_game(obj)
         if team_id is None:
-            min_count = min([ len(team.team_ids) for team in self.teams.values()])
-            teamcandidates = [team for team in self.teams.values() if len(team.team_ids) == min_count]
+            min_count = min([len(team.team_ids) for team in self.teams.values()])
+            teamcandidates = [
+                team for team in self.teams.values() if len(team.team_ids) == min_count
+            ]
             team = random.choice(teamcandidates)
-            self.assign_to_team(obj,team.color)    
+            self.assign_to_team(obj, team.color)
         else:
-            team = self.assign_to_team(obj,team_id)        
+            team = self.assign_to_team(obj, team_id)
         return team
 
     def get_objects(self):
@@ -800,11 +749,12 @@ class CTFController(StateController):
                     objs.append(obj)
         return objs
 
-    def get_other_teams(self,obj):
-        return [team for team in self.teams.values() if obj.get_id() not in team.team_ids]
+    def get_other_teams(self, obj):
+        return [
+            team for team in self.teams.values() if obj.get_id() not in team.team_ids
+        ]
 
-
-    def get_opponents_team(self,obj,other_obj):
+    def get_opponents_team(self, obj, other_obj):
         """
         returns other_obj team if they are an opponent
         """
@@ -816,24 +766,23 @@ class CTFController(StateController):
 
     def join(self, player: Player):
         obj = self.init_player(player)
-        
+
         if self.started:
             # Allows drop in players
             self.spawn_player_obj(obj)
 
-
     def reset(self):
         super().reset()
         self.reset_flags()
-        self.spawn_player_objs(reset=True)
+
         print("Resetting CTF")
 
         # Fill with bots
         for team in self.teams.values():
-            while len(team.team_ids)< self.min_team_size:
+            while len(team.team_ids) < self.min_team_size:
                 self.add_bot(team.color)
-                        
-       
+        self.spawn_player_objs(reset=True)
+
         self.game_start_tick = clock.get_ticks()
         self.game_over = False
 
@@ -851,13 +800,19 @@ class CTFController(StateController):
     def attack_trigger(self, source_obj):
 
         direction = Vector2(0, 1).rotate(source_obj.angle)
-        target_pos = source_obj.get_position() + (direction * source_obj._l_content.tile_size)
+        target_pos = source_obj.get_position() + (
+            direction * source_obj._l_content.tile_size
+        )
         target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
 
         target_obj = None
         for oid in gamectx.physics_engine.space.get_objs_at(target_coord):
             obj2: PhysicalObject = gamectx.object_manager.get_by_id(oid)
-            if obj2.collision_type > 0 and self.playing_tag in obj2.tags and obj2.get_id() in self.get_other_team_ids(source_obj):
+            if (
+                obj2.collision_type > 0
+                and self.playing_tag in obj2.tags
+                and obj2.get_id() in self.get_other_team_ids(source_obj)
+            ):
                 target_obj = obj2
                 break
 
@@ -870,16 +825,16 @@ class CTFController(StateController):
             return False
         else:
             return True
-    
-    def die_trigger(self,obj):
-        
+
+    def die_trigger(self, obj):
+
         flag, flag_team = self.remove_flag_from_player_obj(obj)
         if flag is not None:
             flag.spawn(obj.get_position())
         self.spawn_player_obj(obj)
         return False
 
-    def remove_flag_from_player_obj(self,obj):
+    def remove_flag_from_player_obj(self, obj):
         if self.has_flag_tag in obj.tags:
             flag_inv = obj.get_inventory().find("flag")
             for slot, flag in flag_inv:
@@ -891,7 +846,7 @@ class CTFController(StateController):
                 return flag, self.teams[flag_color]
         return None, None
 
-    def get_flag_color(self,flag_obj):
+    def get_flag_color(self, flag_obj):
         for team in self.teams.values():
             if team.flag_id == flag_obj.get_id():
                 return team.color
@@ -903,40 +858,48 @@ class CTFController(StateController):
             flag_color = self.get_flag_color(obj2)
             flag_team = self.teams[flag_color]
             if obj.get_id() in flag_team.team_ids:
-                if flag_team.flag_holder_id is not None:
+                # Retreive team flag
+                if flag_team.flag_holder_id is None and not flag_team.flag_at_home:
                     self.reset_flag(flag_color)
                     obj.add_reward(1)
-                    self.update_player_reward(obj.get_id(),1)
+                    self.update_player_reward(obj.get_id(), 1)
                 return True
-                
+
             else:
+                # Get Opponent's flag
                 obj.get_inventory().add(obj2)
-                
                 obj.add_tag("hasflag")
-                obj_team = self.get_team(obj)
-                obj_team.score +=1
                 obj.add_reward(1)
-                self.update_player_reward(obj.get_id(),1)
-                if obj_team.score >= self.max_score:
-                    self.game_over =True
-                    obj_team.wins +=1
+                self.update_player_reward(obj.get_id(), 1)
                 obj.add_effect_by_id(f"has_{flag_team.color}_flag")
                 flag_team.flag_holder_id = obj.get_id()
+                flag_team.flag_at_home = False
                 return True
-                
+
         if obj2.config_id == "flag_zone":
-            flag, flag_team = self.remove_flag_from_player_obj(obj)
-            if flag is not None:
-                self.reset_flag(flag_team.color)
-                obj.add_reward(10)
-                self.update_player_reward(obj.get_id(),10)
-                return True       
+            oteam = self.get_team(obj)
+            if oteam.flag_zone_id == obj2.get_id():
+                flag, flag_team = self.remove_flag_from_player_obj(obj)
+
+                if flag is not None:
+                    # Capture Flag
+                    obj.add_reward(10)
+                    self.update_player_reward(obj.get_id(), 10)
+                    obj_team = self.get_team(obj)
+                    obj_team.score += 1
+                    if obj_team.score >= self.max_score:
+                        self.game_over = True
+                        obj_team.wins += 1
+                    else:
+                        self.reset_flag(flag_team.color)
+
+                    return True
 
         return True
 
     def update(self):
 
-        if clock.get_ticks() > (self.game_start_tick + self.ticks_per_round):
+        if self.get_time_left() <= 0:
             print("Out of time, game ending")
             self.game_over = True
 
@@ -944,56 +907,89 @@ class CTFController(StateController):
             if self.reset_time is None:
                 for team in self.teams.values():
                     for oid in team.team_ids:
-                        o:AnimateObject = gamectx.get_object_by_id(oid)
+                        o: AnimateObject = gamectx.get_object_by_id(oid)
                         if team.score < self.max_score:
                             o.add_reward(-2)
-                            self.update_player_reward(oid,-2)
+                            self.update_player_reward(oid, -2)
                         p = o.get_player()
                         if p is not None:
-                            self.content.message_player(p, "Game Over", 10, clear_messages=True)
+                            self.content.message_player(
+                                p, "Game Over", 10, clear_messages=True
+                            )
                 self.reset_time = clock.get_ticks() + self.reset_delay
-            if clock.get_ticks()>self.reset_time:
+            if clock.get_ticks() > self.reset_time:
                 self.reset_time = None
                 # self.reset()
                 self.content.request_reset()
 
+    def get_time_left(self):
+        return max(0, (self.game_start_tick + self.ticks_per_round) - clock.get_ticks())
 
-    def get_player_reward(self,obj_id):
-        return self.player_rewards.get(obj_id,0)
+    def get_player_reward(self, obj_id):
+        return self.player_rewards.get(obj_id, 0)
+
+    def get_player_object_hud_info(self, obj):
+        oteam = self.get_team(obj)
+        scores = [f"[{oteam.color}:{oteam.score}]"]
+        for team in self.get_other_teams(obj):
+            scores.append(f"{team.color}:{team.score}")
+
+        scores = ", ".join(scores)
+        return (
+            f"CTF: {scores}, Reward: {self.get_player_reward(obj.get_id)}, Timeleft: {round(self.get_time_left()/gamectx.config.tick_rate)} "
+        )
 
     def post_process_frame(self, player: Player, renderer: Renderer):
-        if player.player_type != "admin":
-            return
-        msg_fsize = round(renderer.full_resolution[1]/40)
 
-        view_port_resolution =renderer.resolution 
-        view_port_offset = renderer.view_port_offset
+        if player.player_type == "admin":
+            msg_fsize = round(renderer.full_resolution[1] / 40)
+            view_port_resolution = renderer.resolution
+            view_port_offset = renderer.view_port_offset
+            view_port_resolution = renderer.resolution
+            view_port_offset = renderer.view_port_offset
 
-        lines = []
-        lines.append(f"Landia: Capture the Flag")
-        lines.append("-----------------------------")
-        lines.append(f"First to {self.max_score} wins")
-        lines.append("")
-        for team in self.teams.values():
-            lines.append(f"{team.color}: Score {team.score}, Total Wins: {team.wins}")
-            for oid in team.team_ids:
-                o:AnimateObject= gamectx.get_object_by_id(oid)
-                p = o.get_player()
-                if p is None:
-                    player_name = f"bot({o.get_id()})"
-                else:
-                    name = p.name or p.client_id
-                    player_name = f"{name}"
-                lines.append(f"    Player: {player_name}  + {self.get_player_reward(oid)}")
-                o.info_label = player_name
+            lines = []
+            lines.append(f"Landia: Capture the Flag")
+            lines.append("-----------------------------")
+            lines.append(f"First to {self.max_score} wins")
+            lines.append("")
+            for team in self.teams.values():
+                lines.append(
+                    f"{team.color}: Score {team.score}, Total Wins: {team.wins}"
+                )
+                for oid in team.team_ids:
+                    o: AnimateObject = gamectx.get_object_by_id(oid)
+                    p = o.get_player()
+                    if p is None:
+                        player_name = f"bot: {o.get_id()}"
+                    else:
+                        name = f"{p.name}:{p.client_id}" if p.name else p.client_id
+                        player_name = name
+                    lines.append(
+                        f"    Player: {player_name} + {self.get_player_reward(oid)}"
+                    )
+                    o.info_label = player_name
+            renderer.render_text(
+                lines,
+                x=view_port_resolution[0] + view_port_offset[0] * 2,
+                y=view_port_offset[1],
+                fsize=msg_fsize,
+            )
+        # else:
+        #     msg_fsize = round(renderer.full_resolution[1]/40)
+        #     obj_id = player.get_object_id()
+        #     pobj = gamectx.get_object_by_id(obj_id)
+        #     if pobj is not None:
+        #         print("H")
 
-
-                
-        renderer.render_text(
-            lines, 
-            x=view_port_resolution[0] + view_port_offset[0]*2, 
-            y=view_port_offset[1],
-            fsize=msg_fsize)
+        #         team = self.get_team(pobj)
+        #         lines = []
+        #         lines.append(f"{team.color}: Score {team.score}, Total Wins: {team.wins}")
+        #         renderer.render_text(
+        #             lines,
+        #             x=0,
+        #             y=0,
+        #             fsize=msg_fsize,
+        #             use_view_port_surface = True
+        #             )
         return
-     
- 

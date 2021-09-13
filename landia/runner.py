@@ -152,8 +152,8 @@ def get_arguments(override_args=None):
     return  parser.parse_args(override_args)
 
 
-def main():
-    args = get_arguments()
+def main(override_args=None):
+    args = get_arguments(override_args)
     run(args)
     
 def run(args):
@@ -261,6 +261,7 @@ def run(args):
             server_thread.daemon = True
             server_thread.start()
             print("Server started at {} port {}".format(game_def.server_config.hostname, game_def.server_config.port))
+
 
         gamectx.run()
     except (Exception,KeyboardInterrupt) as e:

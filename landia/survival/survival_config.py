@@ -59,7 +59,10 @@ def game_def(content_overrides={}):
     data_path = os.path.join(root_path,CONTENT_ID)
     mod_name = "default"
     mod_path = os.path.join(data_path,mod_name)
-    game_config_filename = 'game_config.json'
+    game_config_filename ='game_config.json'
+    base_config_filename = content_overrides.get("base_config_filename",game_config_filename)
+    disable_local_override = content_overrides.get("disable_local_override",False)
+    
     game_config_root ="config"
     
     content_config = {
@@ -78,22 +81,22 @@ def game_def(content_overrides={}):
     
     full_game_config_root = pkg_resources.resource_filename(__name__,game_config_root)
 
-    default_game_config = read_game_config(full_game_config_root,game_config_filename)
+    default_game_config = read_game_config(full_game_config_root,base_config_filename)
     content_config = merged_dict(content_config, default_game_config)
     
     mod_path = content_overrides.get("mod_path",content_config.get("mod_path"))
     os.makedirs(mod_path,exist_ok=True)
 
     mod_path_full =os.path.join(mod_path,game_config_filename)
-    if os.path.exists(mod_path_full):
+    if os.path.exists(mod_path_full) and not disable_local_override:
         try:
             mod_game_config = read_game_config(mod_path,game_config_filename)
             content_config = merged_dict(content_config, mod_game_config)
         except Exception as e:
             print(f"Error loading config from file {mod_path_full}: {e}")
-    # else:
-    #     with open(mod_path_full,'w') as fp:
-    #         json.dump(read_json_file(os.path.join(full_game_config_root,game_config_filename)),fp,indent=4)
+    else:
+        with open(mod_path_full,'w') as fp:
+            json.dump(read_json_file(os.path.join(full_game_config_root,game_config_filename)),fp,indent=4)
 
     content_config = merged_dict(content_config, content_overrides)
     save_path = content_config.get("save_path")

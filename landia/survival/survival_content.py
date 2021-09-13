@@ -630,7 +630,7 @@ class GameContent(SurvivalContent):
         bar_width_max = round(renderer.resolution[0] /6)
         bar_padding = round(renderer.resolution[1] /200)
         info_x = bar_width_max + bar_padding * 3
-        info_y = renderer.resolution[1] - bar_height * 3 -bar_padding
+        info_y = renderer.resolution[1] - bar_height * 4
 
         tlheight = renderer.resolution[1] - bar_height - bar_padding
         bar_width = round(obj.stamina/obj.stamina_max * bar_width_max)
@@ -666,8 +666,9 @@ class GameContent(SurvivalContent):
             hud_lines.append(f"Total Reward: {obj.total_reward}")
             hud_lines.append(f"Inventory: {obj.get_inventory().as_string()}")
             hud_lines.append(f"Craft Menu: {obj.get_craftmenu().as_string()}")
+            hud_lines.extend([self.get_controller_by_id(controller_id).get_player_object_hud_info(obj) for controller_id in self.active_controllers])
 
-            renderer.render_text(hud_lines, x=info_x, y=info_y, fsize=display_props['fsize'])
+            renderer.render_text(hud_lines, x=info_x, y=info_y, fsize=display_props['fsize'],use_view_port_surface=True)
 
         # Show Messages
         message_output=[]

@@ -22,7 +22,48 @@ from .player import Camera
 from .spritesheet import Spritesheet
 from .utils import colormap
 import random
+from ctypes import windll, Structure, c_long, byref #windows only
 
+windows = []
+try:
+    import win32gui
+
+    def windowEnumerationHandler(hwnd, windows):
+        windows.append((hwnd, win32gui.GetWindowText(hwnd)))
+
+    
+    win32gui.EnumWindows(windowEnumerationHandler, windows)
+except Exception:
+    pass
+
+
+def front(win_name):
+    for i in windows:
+        if i[1] == win_name:
+            win32gui.ShowWindow(i[0],5)
+            win32gui.SetForegroundWindow(i[0])
+            break
+
+class RECT(Structure):
+    _fields_ = [
+    ('left',    c_long),
+    ('top',     c_long),
+    ('right',   c_long),
+    ('bottom',  c_long),
+    ]
+    def width(self):  return self.right  - self.left
+    def height(self): return self.bottom - self.top
+
+
+def onTop():
+    # import win32gui
+    window = pygame.display.get_wm_info()['window']
+    SetWindowPos = windll.user32.SetWindowPos
+    GetWindowRect = windll.user32.GetWindowRect
+    rc = RECT()
+    GetWindowRect(window, byref(rc))
+    SetWindowPos(window, -1, rc.left, rc.top, 0, 0, 0x0001)
+    # windll.user32.SetActiveWindow(window)
 
 def scale(vec, vec2):
     return Vector2(vec.x * vec2.x, vec.y * vec2.y)
@@ -171,6 +212,11 @@ class Renderer:
 
         if self.config.render_to_screen:
             self._final_surf = pygame.display.set_mode(self.full_resolution, flags)
+            if os.name == "nt":
+                pygame.display.set_caption("Landia")
+                front("Landia")
+
+                
         else:
             self._final_surf = pygame.Surface(self.full_resolution)
 

@@ -130,6 +130,9 @@ class StateController(Base):
     def update(self):
         pass
     
+    def get_player_object_hud_info(self,obj):
+        pass
+
     def post_process_frame(self,player:Player,renderer:Renderer):
         pass
 

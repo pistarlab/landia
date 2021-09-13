@@ -1,24 +1,24 @@
-w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1    w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1
+w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1w1
 w1    m1                                                                    r1r1r1r1w1
 w1                                                    t1      ww  s0          t1t1r1w1
-w1        t1                                                          f1        r1w1
+w1        t1                                                          f1          r1w1
 w1                                                                          r1    r1w1
 w1                                                                                r1w1
 w1                  f1          f1                                                r1w1
 w1      f1                                                                        r1w1
 w1                                                          f1                    r1w1
-w1                                                                                r1w1
+w1                       r1r1r1r1                                                 r1w1
 w1                                                                                r1w1
 w1                            m0                                b1                r1w1
 w1      t1                                                                          w1
-w1                      f1fzfz                                      t1          m1  t1r1w1
-w1        t1                                                                      r1w1
+w1                                                              t1          m1  t1r1w1
+w1        t1                                              t1                      r1w1
 w1                                                                              r1  w1
 w1                                                                              r1  w1
 w1                                                                              r1  w1
-w1                                  f1                                          r1  w1
+w1             t1                   f1                                          r1  w1
 w1                                                              b1                r1w1
-w1      t1                                                                          w1
+w1      t1m1                                                                        w1
 w1                      f1                                      t1          m1    t1w1
 w1        t1                                                                      r1w1
 w1                                                          f1                  r1  w1

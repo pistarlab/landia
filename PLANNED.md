@@ -1,0 +1,23 @@
+### Planned Features
+- Game Modes
+    - Survival with Crafting/Hunting
+    - Random Mazes/Terrian
+    - Obstatcle courses which include solving multiple tasks
+    - Block moving puzzles
+    - Physics puzzles
+    - Crafting tasks
+    - Racing 
+    - Soccer
+    - Boardgames - checkers, chess
+- Loading of external configuration and game code at load/runtime
+- 2d physics support
+- Observation types beyond RGB
+- 1st person perspective view
+- Admin UI for dynamic world changes
+- World state saving
+- Support for concurrent RL agent and human players
+- Better/faster network play
+- Async agent play i.e. environment doesn't block when waiting for action form agent
+- Better HUD
+- Ingame menus
+- Support of Large number of concurrent agents and human players

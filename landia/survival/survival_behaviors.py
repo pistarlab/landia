@@ -200,21 +200,26 @@ class PlayingInfection(Behavior):
         if mag <= gamectx.content.tile_size and new_angle == normalize_angle(obj.angle):
             obj.use()
         else:
-            # if self.last_move_blocked:
-            #     direction = self.last_move_direction.rotate(90 * self.last_explore_direction)    
-            #     new_angle = normalize_angle(Vector2(0, 1).angle_to(direction))
 
-            # blocking_obj = get_blocking_object(obj,direction)
+            if self.last_move_blocked and random.random()>0.9:
+                direction = self.last_move_direction.rotate(90 * self.last_explore_direction)
+    
+                new_angle = normalize_angle(Vector2(0, 1).angle_to(direction))
+            else:
+                direction = normalized_direction(orig_direction)
+                new_angle = normalize_angle(Vector2(0, 1).angle_to(direction))
 
-            # if blocking_obj != None:
-            #     if not self.last_move_blocked and random.random() > 0.9:
-            #         self.last_explore_direction *=-1
-            #     self.last_move_blocked = True
-            #     self.last_move_direction = direction
-            # else:
-            #     self.last_move_blocked = False
-            #     self.last_move_direction = direction
-            obj.walk(direction, new_angle)
+            blocking_obj = get_blocking_object(obj,direction)
+
+            if blocking_obj != None and self.following_obj is not None and blocking_obj.get_id() != self.following_obj.get_id():
+                if not self.last_move_blocked and random.random() > 0.8:
+                    self.last_explore_direction *=-1
+                self.last_move_blocked = True
+                self.last_move_direction = direction
+            else:
+                self.last_move_blocked = False
+                self.last_move_direction = direction            
+                obj.walk(direction, new_angle)
 
 
     def on_not_infected(self,obj:AnimateObject):

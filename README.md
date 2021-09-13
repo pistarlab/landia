@@ -14,14 +14,22 @@ A 2d game framework designed to provide playground for AI (Reinforcement Learnin
 <br/>
 <br/>
 
-## Vision
-A fun environment where humans can train and interact with AI agents.
+
+<!-- <img src="docs/ctf.gif" alt="drawing" width="400"/> -->
+<!-- <br/>
+<br/> -->
+<!-- 
+![sfasdfx](docs/infect.mp4) -->
+ <video width="400"  poster="docs/screen_shot0.png" >
+  <source src="docs/infect.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video> 
+
 
 ## Features
 - Multi-agent support
 - Openai gym interface for pingle agent play
 - Network play support (early development)
-- Crafting support
 - Support for concurrent  game modes (eg: Tag + Survival)
 - Written in Python and requires only a few dependencies.
 - Highly configurable and hackable. Easily add new game modes, objects or maps.
@@ -30,35 +38,13 @@ A fun environment where humans can train and interact with AI agents.
     - Survival (collect food or die, avoid monsters)
     - Tag
     - Infection Tag
+- Crafting System
 - Reasonable performance and low memory footprint with plenty of room for future improvements.
 
-### Planned Features
-- Game Modes
-    - Survival with Crafting/Hunting
-    - Random Mazes/Terrian
-    - Obstatcle courses which include solving multiple tasks
-    - Block moving puzzles
-    - Physics puzzles
-    - Crafting tasks
-    - Racing 
-    - Soccer
-    - Boardgames - checkers, chess
-- Loading of external configuration and game code at load/runtime
-- 2d physics support
-- Observation types beyond RGB
-- 1st person perspective view
-- Admin UI for dynamic world changes
-- World state saving
-- Support for concurrent RL agent and human players
-- Better/faster network play
-- Async agent play i.e. environment doesn't block when waiting for action form agent
-- Better HUD
-- Ingame menus
-- Support of Large number of concurrent agents and human players
-
 ## Known Issues
+- Limited number of objects
 - No argument to set the game seed
-- Network play does not scale well.
+- Network play is laggy and does not scale to more than a few remoe users.
 - Incomplete documentation and testing
 - Network play uses more bandwidth than needed.
 - No runtime full game reset
@@ -80,6 +66,11 @@ Full resolution human players can expect several hundred FPS
 
 ## Installation
 
+### Standard (includes package only)
+1. Make sure python 3.7 or newer is installed
+1. ```pip install https://github.com/pistarlab/landia/archive/refs/heads/main.zip#egg=landia```
+
+### Developer (includes code base)
 1. Make sure python 3.7 or newer is installed
 1. Download Repo:  ```git clone https://github.com/pistarlab/landia```
 1. enter repo directory: ```cd landia```
@@ -110,17 +101,63 @@ landia --enable_client --remote_client --hostname=SERVER_HOSTNAME
 landia_test_env --agent_count=2 --max_steps=800000
 ```
 
-***NOTE: For manual execution from repository you can use the following command***
-```bash
-PYTHONPATH=${PYTHONPATH}:./  python landia/runner.py
+### Controls
+
+Standard player
+```
+~ : brings up console
+wsda : movement: up/down/right/left
+
+CONTROLS:
+  console/show help   : ` or h (ESC to return to PLAY MODE
+  camera mode         : m (ESC to return to PLAY MODE
+  move                : w,s,d,a or UP,DOWN,LEFT,RIGHT
+  push                : g
+  grab                : e
+  item  - menu select : z,c
+  item  - use         : r
+  craft - menu select : v,b
+  craft - create      : q
+  game step duration   : \"-\" (faster)/\"=\" (slower) 
+
+CONSOLE COMMANDS:")
+  reset             : Reset Game
+  spawn <object_config_id> : Spawn Object
+  save              : save game state
+  load              : load game state
+
 ```
 
-## RL Development
+## Configuration/Maps
 
-###  Using the Reinforcement learning Env interfaces
+After running Landia for the first time, a configuration and save directory will be created in your home folder. Example: HOME_DIR/landia.
+
+Files within this folder can override any the default configuration:
+
+- HOME_DIR/landia/assets/ will override the landia/assets folder
+- HOME_DIR/landia/assets/ will override the landia/assets folder
+- HOME_DIR/landia//survival/default/game_config.json will override the landia/survival/config/game_config.json
+
+
+### Save location
+World saves will be stored in the HOME_DIR/landia//survival/default/saves folder
+
+
+## Reinforcement Learning Environment Usage
+
+###  Using the RL Env interfaces
 
 MultiAgent and Gym RL interfaces are here:
 [env.py]( landia/env.py)
+
+TODO: More documentation
+
+
+## Development
+
+The landia code base is divided into two parts two allow support for future games under the same framework
+- game code: currently under landia/survival
+- framework code: landia/
 
 TODO: More documentation
 

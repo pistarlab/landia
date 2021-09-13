@@ -11,7 +11,9 @@
         }
     },
     "active_controllers": [
-        "ctf"
+        "pspawn",
+        "foodcollect",
+        "infect1"
     ],
     "controllers": {
         "pspawn": {
@@ -58,7 +60,7 @@
                 "obj": "rock1"
             },
             "static_layers": [
-                "ctf_map_1.txt"
+                "map_layer_1.txt"
             ],
             "index": {
                 "sp": {
@@ -244,7 +246,7 @@
             "config": {
                 "show_info_bar": true,
                 "attack_strength": 60,
-                "walk_speed": 0.2
+                "walk_speed": 1.2
             }
         },
         "apple1": {
