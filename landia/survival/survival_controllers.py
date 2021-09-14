@@ -899,7 +899,7 @@ class CTFController(StateController):
 
     def update(self):
 
-        if self.get_time_left() <= 0:
+        if not self.game_over and self.get_time_left() <= 0:
             print("Out of time, game ending")
             self.game_over = True
 

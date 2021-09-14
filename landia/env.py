@@ -21,7 +21,7 @@ import numpy as np
 from landia.utils import merged_dict
 from pyinstrument import Profiler
 from landia.clock import clock
-
+import os
 
 class LandiaEnv:
 
@@ -84,6 +84,8 @@ class LandiaEnv:
             view_type=view_type,
             include_state_observation=include_state_observation)
         self.admin_player_def.renderer_config.show_console = False
+        self.admin_player_def.renderer_config.sdl_video_driver = "dummy"
+
 
         self.admin_client = GameClient(
             renderer=Renderer(

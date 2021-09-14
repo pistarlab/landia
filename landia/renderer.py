@@ -22,48 +22,53 @@ from .player import Camera
 from .spritesheet import Spritesheet
 from .utils import colormap
 import random
-from ctypes import windll, Structure, c_long, byref #windows only
 
+
+# Windows stuff
 windows = []
 try:
     import win32gui
+    from ctypes import windll, Structure, c_long, byref #windows only
+
 
     def windowEnumerationHandler(hwnd, windows):
         windows.append((hwnd, win32gui.GetWindowText(hwnd)))
 
-    
     win32gui.EnumWindows(windowEnumerationHandler, windows)
+    def front(win_name):
+        for i in windows:
+            if i[1] == win_name:
+                win32gui.ShowWindow(i[0],5)
+                win32gui.SetForegroundWindow(i[0])
+                break
+
+    class Rect(Structure):
+        _fields_ = [
+        ('left',    c_long),
+        ('top',     c_long),
+        ('right',   c_long),
+        ('bottom',  c_long),
+        ]
+        def width(self):  return self.right  - self.left
+        def height(self): return self.bottom - self.top
+
+    def onTop():
+        # import win32gui
+        window = pygame.display.get_wm_info()['window']
+        SetWindowPos = windll.user32.SetWindowPos
+        GetWindowRect = windll.user32.GetWindowRect
+        rc = RECT()
+        GetWindowRect(window, byref(rc))
+        SetWindowPos(window, -1, rc.left, rc.top, 0, 0, 0x0001)
+        # windll.user32.SetActiveWindow(window)
+
 except Exception:
     pass
 
 
-def front(win_name):
-    for i in windows:
-        if i[1] == win_name:
-            win32gui.ShowWindow(i[0],5)
-            win32gui.SetForegroundWindow(i[0])
-            break
-
-class RECT(Structure):
-    _fields_ = [
-    ('left',    c_long),
-    ('top',     c_long),
-    ('right',   c_long),
-    ('bottom',  c_long),
-    ]
-    def width(self):  return self.right  - self.left
-    def height(self): return self.bottom - self.top
 
 
-def onTop():
-    # import win32gui
-    window = pygame.display.get_wm_info()['window']
-    SetWindowPos = windll.user32.SetWindowPos
-    GetWindowRect = windll.user32.GetWindowRect
-    rc = RECT()
-    GetWindowRect(window, byref(rc))
-    SetWindowPos(window, -1, rc.left, rc.top, 0, 0, 0x0001)
-    # windll.user32.SetActiveWindow(window)
+
 
 def scale(vec, vec2):
     return Vector2(vec.x * vec2.x, vec.y * vec2.y)
@@ -370,7 +375,7 @@ class Renderer:
                     rect = image.get_rect()
                     rect.center = loc[0] + barw/2, loc[1] + row_h /2
                     surface.blit(image, rect)
-            elif renderable.get("type") is "text":
+            elif renderable.get("type") == "text":
                 fsize=row_h
                 font = self.font.get(fsize)
                 if font is None:
@@ -388,7 +393,7 @@ class Renderer:
 
         renderables = obj.get_renderables(screen_angle,info_filter=set(self.config.info_filter))
         for renderable in renderables:
-            if renderable.get("type") is "text":
+            if renderable.get("type") == "text":
                 fsize = round(3 * screen_factor[0])
                 color = (255, 255, 255)
                 pos = obj.get_view_position() - Vector2(self.config.tile_size/2, self.config.tile_size/2)
@@ -400,7 +405,7 @@ class Renderer:
                     self.font[fsize] = font
         # for i, l in enumerate(lines):
                 self._view_port_surf.blit(font.render(renderable.get("value"), True, color), loc)
-            elif renderable.get("type") is "infobox":
+            elif renderable.get("type") == "infobox":
                 boxscale = renderable.get("scale",(1.0,1.0))
                 background_color = renderable.get("background_color",(0,0,0))
                 pos = obj.get_view_position() - Vector2(self.config.tile_size/2, self.config.tile_size/2)
@@ -417,7 +422,7 @@ class Renderer:
 
                 self._view_port_surf.blit(surface,loc)
 
-            elif renderable.get("type") is "bar":
+            elif renderable.get("type") == "bar":
                 color = renderable.get("color")
                 bg_color = renderable.get("bg_color")
                 pos = obj.get_view_position() - Vector2(self.config.tile_size/2, self.config.tile_size/2)
@@ -437,7 +442,7 @@ class Renderer:
                                    barh)
 
                 pygame.draw.rect(self._view_port_surf, color, rect)
-            elif renderable.get("type") is "tag":
+            elif renderable.get("type") == "tag":
                 color = renderable.get("color")
                 index = renderable.get("index",0)
                 # bg_color = renderable.get("bg_color")
