@@ -21,3 +21,4 @@
 - Better HUD
 - Ingame menus
 - Support of Large number of concurrent agents and human players
+- Configurable player input
