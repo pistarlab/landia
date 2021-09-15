@@ -160,7 +160,7 @@ After running Landia for the first time, a configuration and save directory will
 Files within this folder can override any the default configuration:
 
 - HOME_DIR/landia/assets/ will override the [landia/assets](landia/assets) folder
-- HOME_DIR/landia/survival/default/game_config.json will override the [landia/survival/config/game_config.json](landia/survival/config/game_config.json)
+- HOME_DIR/landia/survival/default/base_config.json will override the [landia/survival/config/base_config.json](landia/survival/config/base_config.json)
 
 ### Maps
 

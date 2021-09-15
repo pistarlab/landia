@@ -155,7 +155,7 @@ class GameContent(SurvivalContent):
 
     #TODO, would be better to have it's own copy of the config but network traffic would increase when object is created
     def get_object_sprites(self,model_id):
-        return self.config['models'].get(model_id,{}).get('model',{})
+        return self.config['models'].get(model_id,{})
     
     def get_object_sounds(self,config_id):
         return self.config['objects'].get(config_id,{}).get('sounds',{})

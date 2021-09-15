@@ -8,9 +8,8 @@ content_classes = {}
 game_def_registry = {}
 
 
-def load_game_def(game_id,content_overrides={})->GameDef:
-
-    game_def = game_def_registry.get(game_id)(content_overrides)
+def load_game_def(game_id, config_filename, content_overrides={})->GameDef:
+    game_def = game_def_registry.get(game_id)(config_filename, content_overrides)
     return game_def
 
 def load_game_content(game_def:GameDef) -> Content:

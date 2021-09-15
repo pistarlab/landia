@@ -17,7 +17,7 @@ class RendererConfig(Base):
         self.view_port_scale = (1,1)
         self.border_h_offset = 0
         self.format='RGB'
-        self.save_observation=False
+        self.save_observation=True
         self.render_shapes = False
         self.show_console = True
         self.sdl_audio_driver = None # 'dsp'

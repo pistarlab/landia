@@ -1,0 +1,15 @@
+{
+    "active_controllers": [
+        "pspawn",
+        "foodcollect"
+    ],
+
+    "maps": {
+        "main": {
+            "static_layers": [
+                "map_9x9_vwall.txt"
+            ]
+            
+        }
+    }
+}

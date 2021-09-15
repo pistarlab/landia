@@ -108,6 +108,7 @@ class FoodCollectController(StateController):
         self.last_check = 0
         self.check_freq = 10 * self.content.step_duration()
         self.needed_food = 4
+        self.disabled_actions = self.config.get("disabled_actions", [ "jump"])
 
     def get_objects(self):
         objs = []
@@ -127,6 +128,7 @@ class FoodCollectController(StateController):
     def add_player_object(self, obj: PhysicalObject):
         obj.add_trigger("collision_with", "collect", self.collision_with_trigger)
         obj.add_trigger("die", "collect", self.die_trigger)
+        obj.disabled_actions = self.disabled_actions
         self.actor_obj_ids.add(obj.get_id())
 
     def collected_trigger(self, obj: PhysicalObject, actor_obj: PhysicalObject):
@@ -345,6 +347,7 @@ class InfectionController(StateController):
         self.playing_tag = "playinginfection"
         self.tags_used = {self.infected_tag, self.playing_tag}
         self.game_over = False
+        self.disabled_actions = self.config.get("disabled_actions", ["jump", "grab", "craft", "drop"])
 
     def get_objects(self):
         objs = []
@@ -379,6 +382,7 @@ class InfectionController(StateController):
         p = obj.get_player()
         obj.add_trigger("unarmed_attack", "infect", self.infect_trigger)
         obj.add_trigger("receive_damage", "infect", self.receive_damage_trigger)
+        obj.disabled_actions = self.disabled_actions
         if p is None:
             obj.default_behavior = PlayingInfection(self)
         if self.started and p is not None:
@@ -930,9 +934,9 @@ class CTFController(StateController):
 
     def get_player_object_hud_info(self, obj):
         oteam = self.get_team(obj)
-        scores = [f"[{oteam.color}:{oteam.score}]"]
+        scores = [f"[{oteam.color}:{oteam.score},wins:{oteam.wins}]"]
         for team in self.get_other_teams(obj):
-            scores.append(f"{team.color}:{team.score}")
+            scores.append(f"{team.color}:{team.score},wins:{team.wins}")
 
         scores = ", ".join(scores)
         return (

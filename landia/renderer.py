@@ -66,10 +66,6 @@ except Exception:
     pass
 
 
-
-
-
-
 def scale(vec, vec2):
     return Vector2(vec.x * vec2.x, vec.y * vec2.y)
 
@@ -630,15 +626,13 @@ class Renderer:
         
         self._final_surf.blit(self._view_port_surf,self.view_port_offset)
         self.fps_clock.tick()
-        if self.config.save_observation:
-            self.frame_cache = self.get_last_frame()
+        # if self.config.save_observation:
+        #     self.frame_cache = self.get_last_frame()
         
         if self.config.render_to_screen:
             pygame.display.flip()
-        return self.frame_cache
 
     def get_last_frame(self):
-
         img_st = pygame.image.tostring(self._final_surf, self.format)
         data = Image.frombytes(self.format, self.config.resolution, img_st)
         np_data = np.array(data)

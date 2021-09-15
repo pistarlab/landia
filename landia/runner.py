@@ -37,14 +37,16 @@ def get_game_def(
         port,
         tick_rate=None,
         step_mode =False,
+        config_filename="base_config.json",
         content_overrides={}
 ) -> GameDef:
-    game_def = load_game_def(game_id, content_overrides)
+    game_def = load_game_def(game_id, config_filename, content_overrides)
 
     game_def.server_config.enabled = enable_server
     game_def.server_config.hostname = '0.0.0.0'
     game_def.server_config.port = port
     game_def.game_config.step_mode = step_mode
+    game_def.game_config.config_filename =config_filename
 
     # Game
     game_def.game_config.tick_rate = tick_rate
@@ -135,6 +137,7 @@ def get_arguments(override_args=None):
     parser.add_argument("--disable_hud", action="store_true", help="Disable all screen printing")
     parser.add_argument("--enable_resize", action="store_true", help="Enable Screen Resize")
     parser.add_argument("--player_name",help="player name")
+    parser.add_argument("--config_filename",default="base_config.json")
 
     # used for both client and server
     parser.add_argument("--port", default=10001, help="the port the server is running on")
@@ -142,7 +145,6 @@ def get_arguments(override_args=None):
     # Game Options
     parser.add_argument("--enable_profiler", action="store_true", help="Enable Performance profiler")
     parser.add_argument("--tick_rate", default=60, type=int, help="tick_rate")
-
     parser.add_argument("--game_id", default="survival", help="id of game")
     parser.add_argument("--content_overrides", default="{}", type=str,help="Content overrides in JSON format Eg: --content_overrides='{\"maps\":{\"main\":{\"static_layers\":[\"map_layer_test.txt\"]}}}'")
     parser.add_argument("--log_level",default="info",help=", ".join(list(LOG_LEVELS.keys())),type=str)
@@ -181,6 +183,7 @@ def run(args):
         port=args.port,
         tick_rate=args.tick_rate,
         step_mode = args.step_mode,
+        config_filename=args.config_filename,
         content_overrides = json.loads(args.content_overrides),
     )
 

@@ -1,0 +1,26 @@
+{
+    "active_controllers": [
+        "ctf"
+    ],
+
+    "maps": {
+        "main": {
+            "static_layers": [
+                "ctf_map_1.txt"
+            ]   
+        }
+    },
+    "objects": {
+        "human1": {
+            "config": {
+                "energy_decay": 0,
+                "walk_speed": 1.4
+            }
+        },
+        "monster1": {
+            "config": {
+                "walk_speed": 0.6
+            }
+        }
+    }
+}

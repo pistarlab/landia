@@ -365,11 +365,10 @@ class GameClient:
         self.renderer.process_frame(player=self.player)
         self.content.post_process_frame(
             player=self.player, renderer=self.renderer)
-        frame_output = self.renderer.render_frame()
+        self.renderer.render_frame()
 
         if self.config.is_human:
             self.renderer.play_sounds(gamectx.get_sound_events())
-        return frame_output
 
     def get_rgb_array(self):
-        return self.renderer.frame_cache
+        return self.renderer.get_last_frame()

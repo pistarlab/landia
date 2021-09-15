@@ -1,8 +1,0 @@
-{
- "walk": "walk1",
- "idle": null,
- "attack": "hit1",
- "destroy": null,
- "drop": "drop1",
- "grab": "grab1"
-}

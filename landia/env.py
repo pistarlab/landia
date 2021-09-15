@@ -43,7 +43,8 @@ class LandiaEnv:
                  remote_client=False,
                  render_to_screen=False,
                  setup_config={},
-                 content_overrides={}):
+                 content_overrides={},
+                 config_filename = "base_config.json"):
 
         game_def = get_game_def(
             game_id=game_id,
@@ -51,7 +52,8 @@ class LandiaEnv:
             port=port,
             remote_client=remote_client,
             tick_rate=tick_rate,
-            content_overrides=content_overrides)
+            content_overrides=content_overrides,
+            config_filename = config_filename)
 
         self.content = load_game_content(game_def)
 
@@ -213,8 +215,8 @@ class LandiaEnv:
             if skip:
                 continue
             if not client.config.include_state_observation:
-                ob = client.render()
-                # ob = client.get_rgb_array()
+                client.render()
+                ob = client.get_rgb_array()
             obs[agent_id] = ob
             dones[agent_id] = done
             rewards[agent_id] = reward
@@ -238,8 +240,8 @@ class LandiaEnv:
     def render(self, mode=None, player_id=None):
         if player_id is None:
             self.admin_client.run_step()
-            return self.admin_client.render()
-            # return self.admin_client.get_rgb_array()
+            self.admin_client.render()
+            return self.admin_client.get_rgb_array()
         else:
             client = self.agent_clients[player_id]
             return client.get_rgb_array()
@@ -262,6 +264,7 @@ class LandiaEnvSingle(gym.Env):
                 resolution=(42,42),
                 admin_resolution=(1280,720),
                 content_overrides={},
+                config_filename = "base_config.json",
                 render_shapes=True,
                 dry_run = False,
                 player_type="default",
@@ -276,6 +279,7 @@ class LandiaEnvSingle(gym.Env):
             enable_server=False,
             dry_run=dry_run,
             tick_rate=tick_rate,
+            config_filename=config_filename,
             content_overrides=content_overrides,
             view_type=view_type,
             player_type=player_type,
@@ -320,6 +324,7 @@ def multi_agent_run(resolution,admin_resolution,args):
         admin_resolution=admin_resolution,
         dry_run=False,
         tick_rate=args.tick_rate,
+        config_filename = args.config_filename,
         content_overrides={},
         render_to_screen=render)
 
@@ -410,6 +415,7 @@ def single_agent_run(resolution,admin_resolution,args):
         dry_run=False,
         tick_rate=args.tick_rate,
         content_overrides={},
+        config_filename = args.config_filename,
         render_to_screen=render)
 
     start_time = time.time()
@@ -478,6 +484,7 @@ def main():
     parser.add_argument("--tick_rate", default=0, type=int)
     parser.add_argument("--resolution", default="42x42", type=str)
     parser.add_argument("--admin_resolution", default="400x400", type=str)
+    parser.add_argument("--config_filename", default="base_config.json", type=str)
     
     parser.add_argument("--log_level", default="info",
                         help=", ".join(list(LOG_LEVELS.keys())), type=str)
@@ -500,8 +507,6 @@ def main():
     else:
         logging.info("Multi-Agent Mode")
         multi_agent_run(resolution,admin_resolution, args)
-
-
 
 if __name__ == "__main__":
     main()
