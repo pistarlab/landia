@@ -30,6 +30,7 @@ class RendererConfig(Base):
         self.debug_render_bodies = False
         self.enable_resize = False
         self.info_filter = set()
+        self.disable_hud = False
 
 def __repr__(self) -> str:
     return pprint.pformat(self.__dict__)

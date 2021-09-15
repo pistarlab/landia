@@ -270,7 +270,7 @@ class TagController(StateController):
         if not self.is_tagged_tag in source_obj.tags:
             return True
 
-        print("Trying to tag")
+        logging.debug("Trying to tag")
         direction = Vector2(0, 1).rotate(source_obj.angle)
         target_pos = source_obj.get_position() + (
             direction * source_obj._l_content.tile_size
@@ -285,7 +285,7 @@ class TagController(StateController):
                 break
 
         if target_obj is not None:
-            print("Tagging")
+            logging.debug("Tagging")
             source_obj.remove_tag(self.is_tagged_tag)
             target_obj.add_tag(self.is_tagged_tag)
             target_obj.stunned()
@@ -303,7 +303,7 @@ class TagController(StateController):
     def update(self):
         tag_time = clock.get_ticks() - self.last_tag
         if tag_time > self.ticks_per_round:
-            print("Resetting tag game")
+            logging.debug("Resetting tag game")
             for obj in self.get_objects():
                 if obj is not None and obj.get_id() != self.tagged_obj.get_id():
                     obj.add_reward(10)
@@ -361,7 +361,7 @@ class InfectionController(StateController):
         if obj is not None:
             self.add_player_object(obj)
         else:
-            print("Players obj not found")
+            logging.debug("Players obj not found")
 
     def reset_player_object(self, obj):
         obj.add_tag(self.playing_tag)
@@ -475,7 +475,7 @@ class InfectionController(StateController):
         tag_time = clock.get_ticks() - self.last_infect
         self.reset_time
         if not self.game_over and tag_time > self.ticks_per_round:
-            print("Resetting infection game")
+            logging.debug("Resetting infection game")
             for obj in self.get_objects():
                 if obj is not None and not obj.get_id() in self.infected_obj_ids:
                     obj.add_reward(10)
@@ -775,7 +775,7 @@ class CTFController(StateController):
         super().reset()
         self.reset_flags()
 
-        print("Resetting CTF")
+        logging.debug("Resetting CTF")
 
         # Fill with bots
         for team in self.teams.values():
@@ -900,7 +900,7 @@ class CTFController(StateController):
     def update(self):
 
         if not self.game_over and self.get_time_left() <= 0:
-            print("Out of time, game ending")
+            logging.debug("Out of time, game ending")
             self.game_over = True
 
         if self.game_over:
@@ -980,7 +980,7 @@ class CTFController(StateController):
         #     obj_id = player.get_object_id()
         #     pobj = gamectx.get_object_by_id(obj_id)
         #     if pobj is not None:
-        #         print("H")
+        #         logging.debug("H")
 
         #         team = self.get_team(pobj)
         #         lines = []

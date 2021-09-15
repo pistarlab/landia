@@ -185,13 +185,53 @@ MultiAgent and Gym RL interfaces are here:
 * Observation Spaces: 42x42 RGB Images
 * Action Space: 
 
-### Multi Agent Interfcae
-TODO
+### Multi-Agent Interfcae with Random Agent
+This multi agent interface is compatible on the RAY RLlib project's [multi_agent_env.py](https://github.com/ray-project/ray/blob/master/rllib/env/multi_agent_env.py) interface.
 
-### Single Agent Interfcae
-TODO
+```python
+from landia.env import LandiaEnv
+agent_map = {str(i):{} for i in range(4)} #define 4 agents
+env = LandiaEnv(agent_map=agent_map)
+max_steps = 2000
 
-TODO: More documentation
+dones = {"__all__":True}
+episode_count = 0
+actions = {}
+
+for i in range(0,max_steps):
+    if dones.get('__all__'):
+        obs = env.reset()
+        rewards, dones, infos = {}, {'__all__':False},{}
+        episode_count+=1
+    else:
+        obs, rewards, dones, infos = env.step(actions)
+    actions = {agent_id:env.action_spaces[agent_id].sample() for agent_id in obs.keys()}
+
+```
+
+
+### Gym Interface with Random Agent
+
+Single agent [Gym](https://gym.openai.com/) environment interface
+
+```python
+from landia.env import LandiaEnvSingle
+
+env = LandiaEnvSingle()
+max_steps = 2000
+done=True
+action = None
+for i in range(0,max_steps):
+    if done:
+        ob = env.reset()
+        reward, done, info = None, False, {}
+    else:
+        ob, reward, done, info = env.step(action)
+    action = env.action_space.sample()
+
+```
+
+
 ## Development
 
 The landia code base is divided into two parts two allow support for future games under the same framework

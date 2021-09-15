@@ -1,6 +1,7 @@
 
 import argparse
 import logging
+import re
 from landia.registry import load_game_content, GameDef
 import gym
 from gym import spaces
@@ -27,6 +28,7 @@ class LandiaEnv:
 
     def __init__(self,
                  resolution=(42, 42),
+                 admin_resolution=[1280, 720],
                  game_id="survival",
                  hostname='localhost',
                  port=10001,
@@ -39,6 +41,7 @@ class LandiaEnv:
                  player_type="default",
                  include_state_observation=False,
                  remote_client=False,
+                 render_to_screen=False,
                  setup_config={},
                  content_overrides={}):
 
@@ -55,7 +58,6 @@ class LandiaEnv:
         gamectx.initialize(
             game_def=game_def,
             content=self.content)
-        logging.info(game_def)
 
         # Build Clients
         self.agent_map = agent_map
@@ -74,7 +76,7 @@ class LandiaEnv:
             remote_client=remote_client,
             hostname=hostname,
             port=port,
-            resolution=[1280, 720],
+            resolution=admin_resolution,
             fps=tick_rate,
             sound_enabled=False,
             render_shapes=render_shapes,
@@ -84,7 +86,9 @@ class LandiaEnv:
             view_type=view_type,
             include_state_observation=include_state_observation)
         self.admin_player_def.renderer_config.show_console = False
-        self.admin_player_def.renderer_config.sdl_video_driver = "dummy"
+
+        if not render_to_screen:
+            self.admin_player_def.renderer_config.sdl_video_driver = "dummy"
 
 
         self.admin_client = GameClient(
@@ -148,9 +152,10 @@ class LandiaEnv:
         self.action_spaces = {agent_id: self.content.get_action_space(
         ) for agent_id in self.agent_clients.keys()}
         if include_state_observation:
-            self.observation_spaces = {agent_id: self.content.get_observation_space(
+            self.observation_spaces = {agent_id: self.content.get_observation_space(agent_id
             ) for agent_id in self.agent_clients.keys()}
         else:
+            # TODO: Not working at momement
             self.observation_spaces = {agent_id: spaces.Box(low=0, high=255, shape=(
                 resolution[0], resolution[1], 3)) for agent_id in self.agent_clients.keys()}
 
@@ -208,8 +213,8 @@ class LandiaEnv:
             if skip:
                 continue
             if not client.config.include_state_observation:
-                client.render()
-                ob = client.get_rgb_array()
+                ob = client.render()
+                # ob = client.get_rgb_array()
             obs[agent_id] = ob
             dones[agent_id] = done
             rewards[agent_id] = reward
@@ -233,8 +238,8 @@ class LandiaEnv:
     def render(self, mode=None, player_id=None):
         if player_id is None:
             self.admin_client.run_step()
-            self.admin_client.render()
-            return self.admin_client.get_rgb_array()
+            return self.admin_client.render()
+            # return self.admin_client.get_rgb_array()
         else:
             client = self.agent_clients[player_id]
             return client.get_rgb_array()
@@ -254,21 +259,28 @@ class LandiaEnv:
 class LandiaEnvSingle(gym.Env):
 
     def __init__(self,
-                 content_overrides={},
-                 render_shapes=True,
-                 player_type="default",
-                 view_type=1,
-                 tick_rate=0):
-        logging.info("Starting SL v21")
+                resolution=(42,42),
+                admin_resolution=(1280,720),
+                content_overrides={},
+                render_shapes=True,
+                dry_run = False,
+                player_type="default",
+                render_to_screen=False,
+                view_type=1,
+                tick_rate=0):
         self.agent_id = "1"
         self.env_main = LandiaEnv(
+            resolution=resolution,
+            admin_resolution=admin_resolution,
             agent_map={self.agent_id: {}},
             enable_server=False,
+            dry_run=dry_run,
             tick_rate=tick_rate,
             content_overrides=content_overrides,
             view_type=view_type,
             player_type=player_type,
-            render_shapes=render_shapes)
+            render_shapes=render_shapes,
+            render_to_screen=render_to_screen)
         self.observation_space = self.env_main.observation_spaces[self.agent_id]
         self.action_space = self.env_main.action_spaces[self.agent_id]
 
@@ -288,36 +300,13 @@ class LandiaEnvSingle(gym.Env):
     def render(self, mode=None):
         return self.env_main.render(mode=mode)
 
+def multi_agent_run(resolution,admin_resolution,args):
 
-def main():
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("--render", action="store_true", help="Render")
-    parser.add_argument("--mem_profile", action="store_true")
-    parser.add_argument("--max_steps", default=10000, type=int)
-    parser.add_argument("--time_profile", action="store_true")
-    parser.add_argument("--agent_count", default=1,
-                        type=int, help="Number test of agents")
-    parser.add_argument("--verbose", action="store_true")
-    parser.add_argument("--remote_client", action="store_true")
-    parser.add_argument("--tick_rate", default=0, type=int)
-    parser.add_argument("--resolution", default="42x42", type=str)
-    
-    parser.add_argument("--log_level", default="info",
-                        help=", ".join(list(LOG_LEVELS.keys())), type=str)
-
-    args = parser.parse_args()
-
-    logging.getLogger().setLevel(LOG_LEVELS.get(args.log_level))
-
-    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
-
-    res_string = args.resolution.split("x")
-    resolution = (int(res_string[0]), int(res_string[1]))
+    max_steps = args.max_steps
 
     agent_map = {str(i): {} for i in range(args.agent_count)}
     verbose = args.verbose
-    time_profile = args.time_profile
+    compute_profile = args.compute_profile
     mem_profile = args.mem_profile
     render = args.render
     if mem_profile:
@@ -328,15 +317,15 @@ def main():
         agent_map=agent_map,
         remote_client=args.remote_client,
         resolution=resolution,
+        admin_resolution=admin_resolution,
         dry_run=False,
         tick_rate=args.tick_rate,
-        content_overrides={})
+        content_overrides={},
+        render_to_screen=render)
 
-    done_agents = set()
     start_time = time.time()
-    max_steps = args.max_steps
     profiler = None
-    if time_profile:
+    if compute_profile:
         profiler = Profiler()
         profiler.start()
     dones = {"__all__": True}
@@ -345,11 +334,12 @@ def main():
 
     logging.info("OBSERVATION SPACES")
     for name, space in env.observation_spaces.items():
-        logging.info(f"\t{name}: {space}")
+        logging.info(f"\t{name}: {space.__class__.__name__}")    
+            
 
     logging.info("ACTION SPACES")
     for name, space in env.action_spaces.items():
-        logging.info(f"\t{name}: {space}")
+        logging.info(f"\t{name}: {space.__class__.__name__}")
 
     i = 0
     while i < max_steps or max_steps == 0:
@@ -359,8 +349,8 @@ def main():
             episode_count += 1
         else:
             obs, rewards, dones, infos = env.step(actions)
+        actions = {agent_id: env.action_spaces[agent_id].sample() for agent_id in obs.keys()}
         if verbose:
-            actions = {}
             for id, ob in obs.items():
                 if render:
                     env.render(player_id=id)
@@ -372,20 +362,90 @@ def main():
                     done = dones[id]
                     info = infos[id]
 
-                action = env.action_spaces[id].sample()  # input()
-                logging.info(
-                    f"Episode {episode_count} Game Step:{clock.get_ticks()}, Reward: {reward}, {done}, {info} -> Action {action}")
+                if id in actions:
+                    action = actions[id]
+                    logging.info(
+                        f"Episode {episode_count} Game Step:{clock.get_ticks()}, Reward: {reward}, {done}, {info} -> Action {action}")
 
-                try:
-                    action = int(action)
-                except:
-                    action = None
-                actions[id] = action
+        if render:
+            env.render()
+            
+        if mem_profile and (env.step_counter % 100 == 0):
+            current, peak = tracemalloc.get_traced_memory()
+            logging.info(
+                f"Current memory usage is {current / 10**6}MB; Peak was {peak / 10**6}MB")
+        i += 1
+
+    if mem_profile:
+        current, peak = tracemalloc.get_traced_memory()
+        logging.info(
+            f"Current memory usage is {current / 10**6}MB; Peak was {peak / 10**6}MB")
+        tracemalloc.stop()
+    steps_per_sec = max_steps/(time.time()-start_time)
+    logging.info(f"steps_per_sec {steps_per_sec}")
+    if compute_profile:
+        profiler.stop()
+        logging.info(profiler.output_text(
+            unicode=True, color=True, show_all=True))
+
+
+
+def single_agent_run(resolution,admin_resolution,args):
+    """
+    Test random agent
+    """
+
+    max_steps = args.max_steps
+    verbose = args.verbose
+    compute_profile = args.compute_profile
+    mem_profile = args.mem_profile
+    render = args.render
+    if mem_profile:
+        import tracemalloc
+        tracemalloc.start()
+
+    env = LandiaEnvSingle(
+        resolution=resolution,
+        admin_resolution=admin_resolution,
+        dry_run=False,
+        tick_rate=args.tick_rate,
+        content_overrides={},
+        render_to_screen=render)
+
+    start_time = time.time()
+    profiler = None
+    if compute_profile:
+        profiler = Profiler()
+        profiler.start()
+    done = True
+    episode_count = 0
+    action = None
+
+
+    logging.info("OBSERVATION SPACE")
+    logging.info(f"{env.observation_space.__class__.__name__}")
+    
+    logging.info("---")
+
+    logging.info("ACTION SPACE")
+    logging.info(f"{env.action_space.__class__.__name__}")
+
+    i = 0
+    while i < max_steps or max_steps == 0:
+        if done:
+            ob = env.reset()
+            reward, done, info = None, False, {}
+            episode_count += 1
+        else:
+            ob, reward, done, info = env.step(action)
+        action = env.action_space.sample()
+        if verbose:
+            logging.info(
+                    f"Episode {episode_count} Game Step:{clock.get_ticks()}, Reward: {reward}, {done}, {info} -> Action {action}")
         else:
             if render:
                 env.render()
-            actions = {agent_id: env.action_spaces[agent_id].sample(
-            ) for agent_id in env.obs.keys()}
+            
         if mem_profile and (env.step_counter % 1000 == 0):
             current, peak = tracemalloc.get_traced_memory()
             logging.info(
@@ -399,10 +459,48 @@ def main():
         tracemalloc.stop()
     steps_per_sec = max_steps/(time.time()-start_time)
     logging.info(f"steps_per_sec {steps_per_sec}")
-    if time_profile:
+    if compute_profile:
         profiler.stop()
         logging.info(profiler.output_text(
             unicode=True, color=True, show_all=True))
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--single_mode", action="store_true")
+    parser.add_argument("--render", action="store_true", help="Render")
+    parser.add_argument("--mem_profile", action="store_true")
+    parser.add_argument("--max_steps", default=10000, type=int)
+    parser.add_argument("--compute_profile", action="store_true")
+    parser.add_argument("--agent_count", default=4,
+                        type=int, help="Number test of agents")
+    parser.add_argument("--verbose", action="store_true")
+    parser.add_argument("--remote_client", action="store_true")
+    parser.add_argument("--tick_rate", default=0, type=int)
+    parser.add_argument("--resolution", default="42x42", type=str)
+    parser.add_argument("--admin_resolution", default="400x400", type=str)
+    
+    parser.add_argument("--log_level", default="info",
+                        help=", ".join(list(LOG_LEVELS.keys())), type=str)
+
+    args = parser.parse_args()
+
+    logging.getLogger().setLevel(LOG_LEVELS.get(args.log_level))
+
+    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+
+    res_string = args.resolution.split("x")
+    resolution = (int(res_string[0]), int(res_string[1]))
+    admin_res_string = args.admin_resolution.split("x")
+    admin_resolution = (int(admin_res_string[0]), int(admin_res_string[1]))
+    
+
+    if args.single_mode:
+        logging.info("Single-Agent Mode")
+        single_agent_run(resolution,admin_resolution,args)
+    else:
+        logging.info("Multi-Agent Mode")
+        multi_agent_run(resolution,admin_resolution, args)
+
 
 
 if __name__ == "__main__":

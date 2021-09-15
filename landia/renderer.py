@@ -631,20 +631,15 @@ class Renderer:
         self._final_surf.blit(self._view_port_surf,self.view_port_offset)
         self.fps_clock.tick()
         if self.config.save_observation:
-            self.get_last_frame()
-        frame = self.frame_cache
-        self.frame_cache = None
+            self.frame_cache = self.get_last_frame()
         
         if self.config.render_to_screen:
             pygame.display.flip()
-        return frame
+        return self.frame_cache
 
     def get_last_frame(self):
 
         img_st = pygame.image.tostring(self._final_surf, self.format)
         data = Image.frombytes(self.format, self.config.resolution, img_st)
         np_data = np.array(data)
-
-        # cache
-        self.frame_cache = np_data
         return np_data
