@@ -1,7 +1,7 @@
 # piSTAR Landia
 
 ## Overview
-A 2d game framework designed to provide a simple playground for AI (Reinforcement Learning) agents. Humans are also welcome.
+A Hackable 2d game framework designed to provide a simple playground for AI (Reinforcement Learning) agents. Humans are also welcome.
 
 **Version: 0.0.1-dev**: Early release so likely has bugs. Tested on Ubuntu and Windows 10.
 
@@ -99,7 +99,7 @@ landia_test_env --agent_count=2 --max_steps=800000
 
 ### Controls
 
-Standard player
+Standard Human player
 ```
 ~ : brings up console
 wsda : movement: up/down/right/left
@@ -125,6 +125,24 @@ CONSOLE COMMANDS:")
 ```
 
 ## Game Modes
+Note: most the reward values were chosen arbitrarily. Please feel free to 
+
+
+### Survival (Default)
+
+- Rules
+    - Try to collect food and avoid dying of starvation or by being attacked
+- Rewards
+    - No reward signal
+
+### Forager
+
+- Rules
+    - Try to collect food and avoid dying of starvation or by being attacked
+- Rewards
+    - -20 Starvation
+    - +1 Found food
+
 ### Capture The Flag
 
 - Rules
@@ -146,13 +164,6 @@ CONSOLE COMMANDS:")
     - +10 if not infected by end of round
     - +1 when retrieving agent's own flag
 
-### Forager
-
-- Rules
-    - Try to collect food and avoid dying of starvation or by being attacked
-- Rewards
-
-
 ## Configuration
 
 After running Landia for the first time, a configuration and save directory will be created in your home folder. Example: HOME_DIR/landia.
@@ -162,11 +173,34 @@ Files within this folder can override any the default configuration:
 - HOME_DIR/landia/assets/ will override the [landia/assets](landia/assets) folder
 - HOME_DIR/landia/survival/default/base_config.json will override the [landia/survival/config/base_config.json](landia/survival/config/base_config.json)
 
+Predefined Configurations:
+- Capture the Flag: [landia/survival/config/ctf.json](landia/survival/config/ctf.json)
+    ```
+    landia --config_filename=ctf.json
+    ```
+- Forager: [landia/survival/config/forager.json](landia/survival/config/forager.json)
+    ```
+    landia --config_filename=forager.json
+    ```
+- Infection: [landia/survival/config/infection.json](landia/survival/config/infection.json)
+    ```
+    landia --config_filename=infection.json
+    ```
+
+### Using custom configurations
+You can create your own configuration by specifying a configuration file. This configuration will override values within the [landia/survival/config/base_config.json](landia/survival/config/base_config.json)
+
+The following will look for ctf_fast_mode.json in the HOME/landia/survival/default/ folder.
+```
+landia --config_filename=ctf_fast_mode.json
+```
+
 ### Maps
 
 Maps are loaded from text files where each game tile/game object is represented by a two digit code. (eg r1=rock)  The code lookup index is defined by the game config file.
 
 Example Predefined maps
+* [Small map with wall](landia/survival/config/map_9x9vwall.txt)
 * [Capture the flag 1](landia/survival/config/ctf_map_1.txt)
 * [Capture the flag 2](landia/survival/config/ctf_map_2.txt)
 * [Large Map](landia/survival/config/map_layer_1.txt)
@@ -182,8 +216,12 @@ World saves will be stored in the HOME_DIR/landia/survival/default/saves folder
 MultiAgent and Gym RL interfaces are here:
 [env.py]( landia/env.py)
 
-* Observation Spaces: 42x42 RGB Images
-* Action Space: 
+* Observation Spaces
+    - Box(0,255,shape=(42,42)). 42x42 RGB Images
+    - NOTE: The resolution is a paramter with 42x42 as the default
+    
+* Action Space
+    - Descrete(11)
 
 ### Multi-Agent Interfcae with Random Agent
 This multi agent interface is compatible on the RAY RLlib project's [multi_agent_env.py](https://github.com/ray-project/ray/blob/master/rllib/env/multi_agent_env.py) interface.
@@ -231,6 +269,18 @@ for i in range(0,max_steps):
 
 ```
 
+## Citing
+
+```
+@misc{pistar_landia,
+  author = {Kusenda, Kusenda},
+  title = {A Hackable 2d Playground for Multi-Agent RL and Humans},
+  year = {2021},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/pistarlab/landia}},
+}
+```
 
 ## Development
 

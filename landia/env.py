@@ -23,6 +23,7 @@ from landia.utils import merged_dict
 from pyinstrument import Profiler
 from landia.clock import clock
 import os
+import random
 
 class LandiaEnv:
 
@@ -44,8 +45,9 @@ class LandiaEnv:
                  render_to_screen=False,
                  setup_config={},
                  content_overrides={},
-                 config_filename = "base_config.json"):
-
+                 config_filename = "base_config.json",
+                 seed=1):
+        random.seed(seed)
         game_def = get_game_def(
             game_id=game_id,
             enable_server=enable_server,
@@ -71,6 +73,7 @@ class LandiaEnv:
         self.num_players = len(self.players)
         self.possible_players = self.players
         self.max_num_players = self.num_players
+        self.min_num_players = 1
 
         self.admin_player_def = get_player_def(
             enable_client=False,
