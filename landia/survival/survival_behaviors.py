@@ -12,11 +12,9 @@ def get_blocking_object(obj,direction)->PhysicalObject:
     target_pos = obj.get_position() + (direction * gamectx.content.tile_size)
     target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
     blocking_obj:PhysicalObject = None
-    for oid in gamectx.physics_engine.space.get_objs_at(target_coord):
-        if oid is not None:
-            blocking_obj = gamectx.object_manager.get_by_id(oid)
-            if blocking_obj.collision_type == 1:
-                return blocking_obj
+    for blocking_obj in gamectx.get_objects_by_coord(target_coord):
+        if blocking_obj.collision_type == 1:
+            return blocking_obj
     return None
 
 class FollowAnimals(Behavior):
@@ -102,14 +100,7 @@ class PlayingTag(Behavior):
         if mag <= gamectx.content.tile_size and new_angle == normalize_angle(obj.angle):
             obj.use()
         else:
-            # TODO: Create path logging algo. Mark bad deadends and don't use and backtrack
-            # target_pos = obj.get_position() + (direction * gamectx.content.tile_size)
-            # target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
-            # blocked = False
-            # for oid in gamectx.physics_engine.space.get_objs_at(target_coord):
-            #     if oid != self.following_obj.get_id():
-            #         blocking_obj = gamectx.object_manager.get_by_id(oid)
-            #         blocked = True
+
             obj.walk(direction, new_angle)
 
 

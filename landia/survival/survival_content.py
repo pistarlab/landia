@@ -165,7 +165,7 @@ class GameContent(SurvivalContent):
         tries = 0
         while point is None or tries > max_tries:
             coord = self.gamemap.random_coords(num=1)[0]
-            objs = gamectx.physics_engine.space.get_objs_at(coord)
+            objs = gamectx.get_objects_by_coord(coord)
             if len(objs) == 0:
                 point = coord_to_vec(coord)
         return point
@@ -176,7 +176,7 @@ class GameContent(SurvivalContent):
         neighs = self.gamemap.get_neigh_coords(coord)
         point = None
         for neigh in neighs:
-            objs = gamectx.physics_engine.space.get_objs_at(neigh)
+            objs = gamectx.get_objects_by_coord(neigh)
             if len(objs) == 0:
                 point = coord_to_vec(neigh)
         return point
@@ -574,7 +574,6 @@ class GameContent(SurvivalContent):
         p.set_data_value("messages",msgs)
 
     def log_console(self,message,player_id=None):
-        print(f"Log message:{message}")
         for pid,p in gamectx.player_manager.players_map.items():
             if p is not None and (player_id is None or pid == player_id):
                 log = p.get_data_value("log",[])

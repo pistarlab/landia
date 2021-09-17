@@ -180,6 +180,17 @@ class GameContext:
     def get_object_by_id(self, obj_id):
         return self.object_manager.get_by_id(obj_id)
 
+    def get_objects_by_coord(self,coord)->List[GObject]:
+        """
+        TODO: should change to get in area or get by position
+        """
+        objs = []
+        for obj_id in self.physics_engine.space.get_objs_at(coord):
+            obj = self.object_manager.get_by_id(obj_id)
+            if obj is not None:
+                objs.append(obj)
+        return objs
+
     # Event Methods
     def add_event(self, e: Event):
         self.event_manager.add_event(e)

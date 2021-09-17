@@ -69,7 +69,7 @@ class ObjectCollisionController(StateController):
         self.content: SurvivalContent = gamectx.content
         self.actor_obj_ids = set()
         self.obj_config_ids = set(["rock1"])
-        self.reward_delta = -1
+        self.reward_delta = self.config.get("collision_reward", -1)
 
     def get_objects(self):
         objs = []
@@ -100,15 +100,20 @@ class ObjectCollisionController(StateController):
 
 class FoodCollectController(StateController):
     def __init__(self, *args, **kwargs):
+        """
+        Food can be collected by using the grab action or by just walking into it.  Rewards for each.
+        """
         super().__init__(*args, **kwargs)
         self.content: SurvivalContent = gamectx.content
         self.actor_obj_ids = set()
         self.food_ids = set()
         self.game_start_tick = 0
         self.last_check = 0
-        self.check_freq = 10 * self.content.step_duration()
-        self.needed_food = 4
+        self.check_freq = self.config.get("check_freq", 10) * self.content.step_duration()
+        self.needed_food = self.config.get("needed_food", 4)
         self.disabled_actions = self.config.get("disabled_actions", [ "jump"])
+        self.die_reward = self.config.get("die_reward", -20)
+        self.collect_reward = self.config.get("collect_reward", 1)
 
     def get_objects(self):
         objs = []
@@ -132,14 +137,17 @@ class FoodCollectController(StateController):
         self.actor_obj_ids.add(obj.get_id())
 
     def collected_trigger(self, obj: PhysicalObject, actor_obj: PhysicalObject):
-        actor_obj.add_reward(1)
+        """
+        if food grabbed reward
+        """
+        actor_obj.add_reward(self.collect_reward)
         self.food_ids.discard(obj.get_id())
         return True
 
     def collision_with_trigger(self, obj: PhysicalObject, obj2: PhysicalObject):
         if obj2.get_id() not in self.food_ids:
             return True
-        obj.add_reward(1)
+        obj.add_reward(self.collect_reward)
 
         gamectx.remove_object(obj2)
         obj.consume_food(obj2)
@@ -148,7 +156,7 @@ class FoodCollectController(StateController):
         return True
 
     def die_trigger(self, obj):
-        obj.add_reward(-20)
+        obj.add_reward(self.die_reward)
         return True
 
     def spawn_food(self):
@@ -175,7 +183,6 @@ class FoodCollectController(StateController):
             obj.add_trigger("receive_grab", "collect", self.collected_trigger)
             self.food_ids.add(obj.get_id())
             objs.append(obj)
-        # self.spawn_food()
 
     def update(self):
         time_since = clock.get_ticks() - self.last_check
@@ -212,7 +219,7 @@ class TagController(StateController):
         self.behavior = PlayingTag
         self.obj_ids = set()
         self.game_start_tick = 0
-        self.ticks_per_round = 100 * self.content.step_duration()
+        self.ticks_per_round = self.config.get("round_length", 200) * self.content.step_duration()
         self.last_tag = 0
         self.tag_changes = 0
         self.is_tagged_tag = "tagged"
@@ -280,8 +287,7 @@ class TagController(StateController):
         target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
 
         target_obj = None
-        for oid in gamectx.physics_engine.space.get_objs_at(target_coord):
-            obj2: PhysicalObject = gamectx.object_manager.get_by_id(oid)
+        for obj2 in gamectx.get_objects_by_coord(target_coord):
             if obj2.collision_type > 0 and self.playing_tag_tag in obj2.tags:
                 target_obj = obj2
                 break
@@ -329,7 +335,6 @@ class TagController(StateController):
                 fsize=msg_fsize,
             )
 
-
 class InfectionController(StateController):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -338,8 +343,8 @@ class InfectionController(StateController):
         self.behavior = PlayingInfection
         self.obj_ids = set()
         self.game_start_tick = 0
-        self.ticks_per_round = 100 * self.content.step_duration()
-        self.reset_delay = 20 * self.content.step_duration()
+        self.ticks_per_round = self.config.get("round_length", 100) * self.content.step_duration()
+        self.reset_delay = self.config.get("reset_delay", 10) * self.content.step_duration()
         self.reset_time = None
         self.last_infect = 0
         self.infect_counter = 0
@@ -447,8 +452,7 @@ class InfectionController(StateController):
         target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
 
         target_obj = None
-        for oid in gamectx.physics_engine.space.get_objs_at(target_coord):
-            obj2: PhysicalObject = gamectx.object_manager.get_by_id(oid)
+        for obj2 in gamectx.get_objects_by_coord(target_coord):
             if (
                 obj2.collision_type > 0
                 and self.playing_tag in obj2.tags
@@ -562,7 +566,7 @@ class CTFController(StateController):
         self.reset_delay = 10
 
         self.ticks_per_round = (
-            self.config.get("round_lenght", 200) * self.content.step_duration()
+            self.config.get("round_length", 200) * self.content.step_duration()
         )
         self.game_start_tick = 0
 
@@ -810,8 +814,7 @@ class CTFController(StateController):
         target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
 
         target_obj = None
-        for oid in gamectx.physics_engine.space.get_objs_at(target_coord):
-            obj2: PhysicalObject = gamectx.object_manager.get_by_id(oid)
+        for obj2 in gamectx.get_objects_by_coord(target_coord):
             if (
                 obj2.collision_type > 0
                 and self.playing_tag in obj2.tags

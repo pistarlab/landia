@@ -877,11 +877,10 @@ class AnimateObject(PhysicalObject):
         for r in range(row_max, row_min - 1, -1):
             row_results = []
             for c in range(col_min, col_max + 1):
-                obj_ids = gamectx.physics_engine.space.get_objs_at((c, r))
+                objs = gamectx.get_objects_by_coord((c, r))
                 obs_at_loc = empty_loc_vec
-                if len(obj_ids) > 0:
-                    obj_id = obj_ids[0]  # TODO: Switch to use TOP
-                    obj = gamectx.object_manager.get_by_id(obj_id)
+                if len(objs) > 0:
+                    obj = objs[0]  # TODO: Switch to use TOP
                     obs_at_loc = self.get_object_observation(obj)
                 row_results.append(obs_at_loc)
             results.append(row_results)
@@ -908,9 +907,8 @@ class AnimateObject(PhysicalObject):
         obj_list = []
         for r in range(row_max, row_min - 1, -1):
             for c in range(col_min, col_max + 1):
-                obj_ids = gamectx.physics_engine.space.get_objs_at((c, r))
-                for obj_id in obj_ids:
-                    obj_seen = gamectx.object_manager.get_by_id(obj_id)
+                objs = gamectx.get_objects_by_coord((c, r))
+                for obj_seen in objs:
                     if (
                         obj_seen is not None
                         and obj_seen.is_visible()
@@ -974,9 +972,9 @@ class AnimateObject(PhysicalObject):
 
         target_pos = self.get_position() + (direction * self._l_content.tile_size * 2)
         target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
-        oids = gamectx.physics_engine.space.get_objs_at(target_coord)
+        objs = gamectx.phyget_objects_by_coord(target_coord)
 
-        if len(oids) == 0:
+        if len(objs) == 0:
             ticks_in_action = self._l_content.step_duration() * 2
             self._action = self._action = Action(
                 ACTION_JUMP,
@@ -996,8 +994,7 @@ class AnimateObject(PhysicalObject):
         received_obj = None
 
         target_coord = gamectx.physics_engine.vec_to_coord(self.get_position())
-        for oid in gamectx.physics_engine.space.get_objs_at(target_coord):
-            target_obj: PhysicalObject = gamectx.object_manager.get_by_id(oid)
+        for target_obj in gamectx.get_objects_by_coord(target_coord):
             if target_obj.receive_grab(self):
                 received_obj = target_obj
                 break
@@ -1008,8 +1005,7 @@ class AnimateObject(PhysicalObject):
             target_pos = self.get_position() + (direction * self._l_content.tile_size)
             target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
 
-            for oid in gamectx.physics_engine.space.get_objs_at(target_coord):
-                target_obj: PhysicalObject = gamectx.object_manager.get_by_id(oid)
+            for target_obj in gamectx.get_objects_by_coord(target_coord):
                 if target_obj.receive_grab(self):
                     received_obj = target_obj
                     break
@@ -1051,9 +1047,9 @@ class AnimateObject(PhysicalObject):
         target_pos = self.get_position() + (direction * self._l_content.tile_size)
         target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
 
-        oids = gamectx.physics_engine.space.get_objs_at(target_coord)
+        objs = gamectx.get_objects_by_coord(target_coord)
 
-        if len(oids) == 0:
+        if len(objs) == 0:
             obj = self.remove_selected_item()
             if obj is not None:
                 obj.enable()
@@ -1085,8 +1081,7 @@ class AnimateObject(PhysicalObject):
         target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
 
         target_objs = []
-        for oid in gamectx.physics_engine.space.get_objs_at(target_coord):
-            obj2: PhysicalObject = gamectx.object_manager.get_by_id(oid)
+        for obj2 in gamectx.get_objects_by_coord(target_coord):
             if obj2.collision_type > 0:
                 target_objs.append(obj2)
 
@@ -1124,8 +1119,7 @@ class AnimateObject(PhysicalObject):
         target_pos = self.get_position() + (direction * self._l_content.tile_size)
         target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
 
-        for oid in gamectx.physics_engine.space.get_objs_at(target_coord):
-            obj2: PhysicalObject = gamectx.object_manager.get_by_id(oid)
+        for obj2 in gamectx.get_objects_by_coord(target_coord):
             obj2.receive_push(self, self.attack_strength, direction)
 
         self._action = Action(

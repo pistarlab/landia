@@ -42,6 +42,7 @@ Capture the flag
 - Incomplete documentation and testing
 - Network play uses more bandwidth than needed.
 - No runtime full game reset
+- No perspective view
 
 [Future Imporvements](PLANNED.md)
 
@@ -72,7 +73,6 @@ Full resolution human players can expect several hundred FPS
 1. enter repo directory: ```cd landia```
 1. (Optional) if using Anaconda, create conda environment: ```conda create -n landia```
 1. Install requirements via pip: ```pip install -e .```
-
 
 ## Usage
 
@@ -128,14 +128,18 @@ CONSOLE COMMANDS:")
 Note: most the reward values were chosen arbitrarily. Please feel free to 
 
 
-### Survival (Default)
+### Survival - [Default Config](landia/survival/config/base_config.json)
 
 - Rules
     - Try to collect food and avoid dying of starvation or by being attacked
 - Rewards
     - No reward signal
 
-### Forager
+### Forager - [Config File](landia/survival/config/forager.json)
+
+```
+landia --config_filename=forager.json
+```
 
 - Rules
     - Try to collect food and avoid dying of starvation or by being attacked
@@ -143,7 +147,11 @@ Note: most the reward values were chosen arbitrarily. Please feel free to
     - -20 Starvation
     - +1 Found food
 
-### Capture The Flag
+### Capture The Flag - [Config File](landia/survival/config/ctf.json)
+
+```
+landia --config_filename=ctf.json
+```
 
 - Rules
     - two teams, red and blue, try to catpure each other flags
@@ -155,10 +163,14 @@ Note: most the reward values were chosen arbitrarily. Please feel free to
     - +1 when retrieving agent's own flag
     - +10 when capturing the opposing teams flag
 
-### Infection
+### Infection - [Config File](landia/survival/config/infection.json)
+
+```
+landia --config_filename=infection.json
+```
 
 - Rules
-    - infected players (blue tag) try to infect non infected players
+    - infected players have a blue tag and try to infect non infected players
 - Rewards
     - -2  if infected at end of round
     - +10 if not infected by end of round
@@ -173,37 +185,23 @@ Files within this folder can override any the default configuration:
 - HOME_DIR/landia/assets/ will override the [landia/assets](landia/assets) folder
 - HOME_DIR/landia/survival/default/base_config.json will override the [landia/survival/config/base_config.json](landia/survival/config/base_config.json)
 
-Predefined Configurations:
-- Capture the Flag: [landia/survival/config/ctf.json](landia/survival/config/ctf.json)
-    ```
-    landia --config_filename=ctf.json
-    ```
-- Forager: [landia/survival/config/forager.json](landia/survival/config/forager.json)
-    ```
-    landia --config_filename=forager.json
-    ```
-- Infection: [landia/survival/config/infection.json](landia/survival/config/infection.json)
-    ```
-    landia --config_filename=infection.json
-    ```
-
 ### Using custom configurations
 You can create your own configuration by specifying a configuration file. This configuration will override values within the [landia/survival/config/base_config.json](landia/survival/config/base_config.json)
 
-The following will look for ctf_fast_mode.json in the HOME/landia/survival/default/ folder.
+Example: The following will look for ctf_fast_mode.json in the HOME/landia/survival/default/ folder.
 ```
 landia --config_filename=ctf_fast_mode.json
 ```
 
 ### Maps
 
-Maps are loaded from text files where each game tile/game object is represented by a two digit code. (eg r1=rock)  The code lookup index is defined by the game config file.
+Maps are loaded from text files where each game tile/game object is represented by a **two digit code**. (eg r1=rock)  The code lookup index is defined in the [game config file](landia/survival/config/base_config.txt).
 
 Example Predefined maps
 * [Small map with wall](landia/survival/config/map_9x9vwall.txt)
 * [Capture the flag 1](landia/survival/config/ctf_map_1.txt)
 * [Capture the flag 2](landia/survival/config/ctf_map_2.txt)
-* [Large Map](landia/survival/config/map_layer_1.txt)
+* [Large Map](landia/survival/config/map_large_1.txt)
 
 **Custom Maps** must be defined in the game config and will be loaded from the HOME_DIR/landia/ directory if found
 
@@ -218,7 +216,8 @@ MultiAgent and Gym RL interfaces are here:
 
 * Observation Spaces
     - Box(0,255,shape=(42,42)). 42x42 RGB Images
-    - NOTE: The resolution is a paramter with 42x42 as the default
+    - The resolution is a paramter with 42x42 as the default
+    - Currently only support for non-perspective 3rd person view (same as human)
     
 * Action Space
     - Descrete(11)
@@ -284,11 +283,22 @@ for i in range(0,max_steps):
 
 ## Development
 
-The landia code base is divided into two parts two allow support for future games under the same framework
-- game code: currently under landia/survival
-- framework code: landia/
+Landia's code is flexible but may be confusing at first. The code base evolved into it's current state and could really benefit from a refactoring with better naming. 
+- The code base is divided into two parts two allow support for future content under the same framework. 
 
-TODO: More documentation
+#### Overview
+- Entrypoints [Human play](landia/runner.py), [RL Environment](landia/env.py) 
+- Core Framework: in root of [landia](landia/)
+    - This is the core framework code which multiple games could share. It handles things like the primary game loop, rendering, and client/server communication.
+    - Main Context Object and (Human) Game loop are handled in [landia/game.py](landia/game.py).
+- Assets: [landia/survival](landia/assets/)
+    - Sprites, Sounds, and other shared media
+- Game Content Types (currently only one type available)
+    - Survival Game:
+        - Root: [landia/survival](landia/survival/)
+        - Configuration: [landia/survival/config](landia/survival/config)
+        - Core content file: [survival_content](landia/surival/survival_content.py). This is where most of the game is wired together.
+        - [State Controllers](landia/surival/survival_controllers.py) are the are used to control game state. This is were the rules for Forager, Infection, Tag and Capture the flag are defined        
 
 ## Acknowledgments
 
