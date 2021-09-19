@@ -23,7 +23,7 @@ from .survival_common import (
     SurvivalContent,
     Trigger,
 )
-from .survival_utils import angle_to_sprite_direction, coord_to_vec, ints_to_multi_hot
+from .survival_utils import angle_to_sprite_direction, coord_to_vec, ints_to_multi_hot, normalized_direction
 
 ACTION_IDLE = "idle"
 ACTION_ATTACK = "attack"
@@ -54,9 +54,11 @@ ACTION_LIST = [
     ACTION_EAT,
     ACTION_WALK,
     ACTION_JUMP,
-    ACTION_STUNNED,
+    ACTION_STUNNED
 ]
 ACTION_MAP = {a: i for i, a in enumerate(ACTION_LIST)}
+
+
 
 type_tree = {
     "physical_object": None,
@@ -137,6 +139,7 @@ class PhysicalObject(GObject):
         self._l_model = None
         self._l_sounds = None
         self.info_label = None
+        
 
         self.default_action_type = self.config.get("default_action_type", ACTION_IDLE)
         self._action: Action = None
@@ -422,7 +425,6 @@ class PhysicalObject(GObject):
 
     @invoke_triggers
     def collision_with(self, obj2):
-
         if self.collision_type > 0 and self.collision_type == obj2.collision_type:
             ticks_in_action = 1 * self._l_content.step_duration()
             self._action = Action(
@@ -663,14 +665,12 @@ class CraftMenu:
         reqs = self._l_content.get_config_from_config_id(config_id).get(
             "craft_requirements"
         )
-        print(reqs)
         if reqs is not None:
             have_reqs = True
             # Check requirements
             for req_id, count in reqs.items():
                 objs = inventory.find(req_id)
                 if len(objs) == 0:
-                    print("NON FOUND")
                     have_reqs = False
                     break
                 else:
@@ -679,7 +679,6 @@ class CraftMenu:
                         have_reqs = False
                         break
             if not have_reqs:
-                print("Dont have req")
                 return None
 
             # Remove requirements
@@ -755,48 +754,56 @@ class AnimateObject(PhysicalObject):
     def process_input_event(self, e: InputEvent):
         if self.get_action().blocking:
             return
-        # keydown = set(e.input_data['pressed'])
         keydown = set(e.input_data["keydown"])
         # Object Movement
         direction = None
         angle_update = None
 
-        if 23 in keydown:
-            # W UP
-            direction = Vector2(0, -1)
-            angle_update = 180
-        if 19 in keydown:
-            # S DOWN
-            direction = Vector2(0, 1)
-            angle_update = 0
-        if 4 in keydown:
-            # D RIGHT
-            direction = Vector2(1, 0)
-            angle_update = 270
-        if 1 in keydown:
-            # A LEFT
-            direction = Vector2(-1, 0)
-            angle_update = 90
+        # TODO: need to track button state manually
+        if 28 in keydown :
+            pos = e.input_data['mouse_pos']
+            direction:Vector2 = normalized_direction( Vector2(pos) -self.get_position())
+            angle_update = Vector2(0,1).angle_to(direction)
+            print(direction)
+            print(angle_update)
 
-        if 5 in keydown:
+        km = self._l_content.key_map
+
+
+        # TODO: Add perspective view and controls
+
+        if km['UP'] in keydown:
+            direction = Vector2(0, -1)
+            angle_update = Vector2(0,1).angle_to(direction)
+        if km['DOWN'] in keydown:
+            direction = Vector2(0, 1)
+            angle_update = Vector2(0,1).angle_to(direction)
+        if km['RIGHT'] in keydown:
+            direction = Vector2(1, 0)
+            angle_update = Vector2(0,1).angle_to(direction)
+        if km['LEFT'] in keydown:
+            direction = Vector2(-1, 0)
+            angle_update = Vector2(0,1).angle_to(direction)
+
+        if km['GRAB'] in keydown:
             self.grab()
-        elif 6 in keydown:
+        elif km['DROP'] in keydown:
             self.drop()
-        elif 18 in keydown:
+        elif km['USE'] in keydown:
             self.use()
-        elif 3 in keydown:
+        elif km['INV_MENU_NEXT'] in keydown:
             self.select_item()
-        elif 26 in keydown:
+        elif km['INV_MENU_PREV'] in keydown:
             self.select_item(prev=True)
-        elif 2 in keydown:
+        elif km['CRAFT_MENU_NEXT'] in keydown:
             self.select_craft_type()
-        elif 22 in keydown:
+        elif km['CRAFT_MENU_PREV'] in keydown:
             self.select_craft_type(prev=True)
-        elif 17 in keydown:
+        elif km['CRAFT'] in keydown:
             self.craft()
-        elif 33 in keydown:
+        elif km['JUMP'] in keydown:
             self.jump()
-        elif 7 in keydown:
+        elif km['PUSH'] in keydown:
             self.push()
         elif direction is not None:
             self.walk(direction=direction, angle_update=angle_update)
@@ -972,7 +979,7 @@ class AnimateObject(PhysicalObject):
 
         target_pos = self.get_position() + (direction * self._l_content.tile_size * 2)
         target_coord = gamectx.physics_engine.vec_to_coord(target_pos)
-        objs = gamectx.phyget_objects_by_coord(target_coord)
+        objs = gamectx.get_objects_by_coord(target_coord)
 
         if len(objs) == 0:
             ticks_in_action = self._l_content.step_duration() * 2
@@ -1084,7 +1091,6 @@ class AnimateObject(PhysicalObject):
         for obj2 in gamectx.get_objects_by_coord(target_coord):
             if obj2.collision_type > 0:
                 target_objs.append(obj2)
-
         for obj2 in target_objs:
             obj2.receive_damage(self, self.attack_strength)
 

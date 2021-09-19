@@ -254,6 +254,28 @@ class Renderer:
                          p2,
                          1)
 
+    def screen_pos_to_game_pos(self,player:Player,pos):
+        camera: Camera = None
+        center: Vector2 = None
+        if player:
+            camera = player.get_camera()
+        else:
+            camera = Camera(center=Vector2(self.view_width/2, self.view_height/2))
+
+        center = camera.get_center()
+        if center is None:
+            center = Vector2(self.view_width/2, self.view_height/2)
+        angle = camera.get_angle()
+
+        center = center - camera.position_offset
+        screen_factor = Vector2(self.width / self.view_width, self.height / self.view_height)
+        screen_view_center = scale(screen_factor, Vector2(self.view_width, self.view_height) / 2.0)
+
+        scaled_pos = (pos[0] - screen_view_center[0])/ screen_factor[0], (pos[1] - screen_view_center[1])/ screen_factor[1]
+        screen_pos = scaled_pos[0] + center[0] , scaled_pos[1] + center[1]
+        return screen_pos
+        
+
     def _draw_grid(self, center, angle, screen_factor, screen_view_center, color=(50, 50, 50), size=20, view_type=0):
         line_num = int(self.view_width/size) + 4
 

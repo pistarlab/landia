@@ -107,10 +107,13 @@ class FoodCollectController(StateController):
         self.content: SurvivalContent = gamectx.content
         self.actor_obj_ids = set()
         self.food_ids = set()
+        self.monster_ids = set()
         self.game_start_tick = 0
         self.last_check = 0
         self.check_freq = self.config.get("check_freq", 10) * self.content.step_duration()
         self.needed_food = self.config.get("needed_food", 4)
+        self.num_monsters = self.config.get("num_monsters", 1)
+        self.monster_respawn_in_round = self.config.get("monster_respawn_in_round",True)
         self.disabled_actions = self.config.get("disabled_actions", [ "jump"])
         self.die_reward = self.config.get("die_reward", -20)
         self.collect_reward = self.config.get("collect_reward", 1)
@@ -167,6 +170,17 @@ class FoodCollectController(StateController):
             self.food_ids.add(food.get_id())
             food.add_trigger("receive_grab", "collect", self.collected_trigger)
 
+    def spawn_monsters(self):
+        all_monsters = gamectx.object_manager.get_objects_by_config_id("monster1")
+        total_monsters = len(all_monsters)
+        for i in range(self.num_monsters-total_monsters):
+            print("Adding")
+            loc = self.content.get_available_location()
+            if loc is not None:
+                obj: Monster = self.content.create_object_from_config_id("monster1")
+                obj.spawn(loc)
+                self.monster_ids.add(obj.get_id())
+
     def reset(self):
         super().reset()
 
@@ -184,9 +198,13 @@ class FoodCollectController(StateController):
             self.food_ids.add(obj.get_id())
             objs.append(obj)
 
+        self.spawn_monsters()
+
     def update(self):
         time_since = clock.get_ticks() - self.last_check
         if time_since > self.check_freq:
+            if self.monster_respawn_in_round:
+                self.spawn_monsters()
             if len(self.food_ids) < self.needed_food:
                 self.spawn_food()
 

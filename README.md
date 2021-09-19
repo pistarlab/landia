@@ -220,7 +220,9 @@ MultiAgent and Gym RL interfaces are here:
     - Currently only support for non-perspective 3rd person view (same as human)
     
 * Action Space
-    - Descrete(11)
+    - Descrete(14)
+    - UP, DOWN, RIGHT, LEFT, GRAB, DROP, USE, INV_MENU_NEXT, INV_MENU_PREV, CRAFT_MENU_NEXT, CRAFT_MENU_PREV, CRAFT, JUMP, PUSH
+
 
 ### Multi-Agent Interfcae with Random Agent
 This multi agent interface is compatible on the RAY RLlib project's [multi_agent_env.py](https://github.com/ray-project/ray/blob/master/rllib/env/multi_agent_env.py) interface.

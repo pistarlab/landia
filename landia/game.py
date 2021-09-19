@@ -1,5 +1,4 @@
 import time
-from .inputs import get_input_events
 from .common import register_base_cls, Base
 from .content import Content
 import sys

@@ -10,6 +10,12 @@
             ]
         }
     },
+    "controllers": {
+        "infect1": {
+            "class": "InfectionController",
+            "config": {}
+        }
+    },
     "objects": {
         "human1": {
             "config": {

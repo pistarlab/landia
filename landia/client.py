@@ -345,7 +345,7 @@ class GameClient:
         if self.player is not None:
             input_events = self.player.pull_input_events()
             if self.config.is_human:
-                input_events.extend(get_input_events(self.player))
+                input_events.extend(get_input_events(self.player,self.renderer))
 
             for event in input_events:
                 gamectx.event_manager.add_event(event)

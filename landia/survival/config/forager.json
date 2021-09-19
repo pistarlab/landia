@@ -3,13 +3,36 @@
         "pspawn",
         "foodcollect"
     ],
-
+    "controllers": {
+        "foodcollect": {
+            "class": "FoodCollectController",
+            "config": {
+                "num_monsters":1,
+                "monster_auto_respawn":false
+            }
+        }
+    },
     "maps": {
         "main": {
             "static_layers": [
                 "map_9x9_vwall.txt"
             ]
             
+        }
+    },
+    "objects": {
+        "human1": {
+            "config": {
+                "energy_decay": 4,
+                "energy_decay_period": 1,
+                "low_energy_health_penalty": 4,
+                "walk_speed": 1.4
+            }
+        },
+        "monster1": {
+            "config": {
+                "walk_speed": 0.5
+            }
         }
     }
 }

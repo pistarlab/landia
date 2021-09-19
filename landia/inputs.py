@@ -3,6 +3,7 @@ from typing import List, Dict
 from .event import (Event, ViewEvent,InputEvent,AdminCommandEvent)
 
 from .common import Vector2
+from .renderer import Renderer
 from landia.player import Player
 
 def get_default_key_map():
@@ -49,6 +50,11 @@ def get_default_key_map():
     key_map["MOUSE_DOWN_3"] = 30
     key_map["MOUSE_DOWN_4"] = 31
     key_map["MOUSE_DOWN_5"] = 32
+    key_map["MOUSE_UP_1"] = 128
+    key_map["MOUSE_UP_2"] = 129
+    key_map["MOUSE_UP_3"] = 130
+    key_map["MOUSE_UP_4"] = 131
+    key_map["MOUSE_UP_5"] = 132
 
 
     return key_map
@@ -58,30 +64,31 @@ DEFAULT_KEYMAP = get_default_key_map()
 # Used to check for key press
 # Note: keys that should be checked for being press state should be added here
 # key_down event will occur when another key is pressed. For example. if moving is iterrupted by an attack
-key_list = []
-key_list.append(pygame.K_q)
-key_list.append(pygame.K_LEFT)
-key_list.append(pygame.K_RIGHT)
-key_list.append(pygame.K_DOWN)
-key_list.append(pygame.K_LSHIFT)
-key_list.append(pygame.K_UP)
-key_list.append(pygame.K_e)
-key_list.append(pygame.K_f)
-key_list.append(pygame.K_r)
-key_list.append(pygame.K_w)
-key_list.append(pygame.K_q)
-key_list.append(pygame.K_g)
-key_list.append(pygame.K_x)
-key_list.append(pygame.K_z)
-key_list.append(pygame.K_v)
-key_list.append(pygame.K_b)
-key_list.append(pygame.K_c)
-key_list.append(pygame.K_s)
-key_list.append(pygame.K_a)
-key_list.append(pygame.K_d)
+key_press_detect_list = []
+key_press_detect_list.append(pygame.K_q)
+key_press_detect_list.append(pygame.K_LEFT)
+key_press_detect_list.append(pygame.K_RIGHT)
+key_press_detect_list.append(pygame.K_DOWN)
+key_press_detect_list.append(pygame.K_LSHIFT)
+key_press_detect_list.append(pygame.K_UP)
+key_press_detect_list.append(pygame.K_e)
+key_press_detect_list.append(pygame.K_f)
+key_press_detect_list.append(pygame.K_r)
+key_press_detect_list.append(pygame.K_w)
+key_press_detect_list.append(pygame.K_q)
+key_press_detect_list.append(pygame.K_g)
+key_press_detect_list.append(pygame.K_x)
+key_press_detect_list.append(pygame.K_z)
+key_press_detect_list.append(pygame.K_v)
+key_press_detect_list.append(pygame.K_b)
+key_press_detect_list.append(pygame.K_c)
+key_press_detect_list.append(pygame.K_s)
+key_press_detect_list.append(pygame.K_a)
+key_press_detect_list.append(pygame.K_d)
+
 
 import sys
-def get_input_events(player:Player) -> List[Event]:
+def get_input_events(player:Player,renderer:Renderer) -> List[Event]:
 
     player_id = player.get_id()
     events: List[Event] = []
@@ -116,24 +123,30 @@ def get_input_events(player:Player) -> List[Event]:
             key_down.add(27)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             key_down.add(DEFAULT_KEYMAP.get("MOUSE_DOWN_{}".format(event.button)))
+        elif event.type == pygame.MOUSEBUTTONUP:
+            key_down.add(DEFAULT_KEYMAP.get("MOUSE_UP_{}".format(event.button)))
         elif event.type == pygame.KEYDOWN:
             key_down.add(DEFAULT_KEYMAP.get(event.key))
         elif event.type == pygame.KEYUP:
             key_up.add(DEFAULT_KEYMAP.get(event.key))
-
+    
     key_press_state = pygame.key.get_pressed()
-    for key in key_list:
+    for key in key_press_detect_list:
         if key_press_state[key]:
             key_down.add(DEFAULT_KEYMAP[key])
 
     input_received = len(key_down) >0 or len(key_down) >0 or len(key_up)
-    if input_received :
+    if input_received:
+        if player.is_human:
+            mouse_pos = renderer.screen_pos_to_game_pos(player,pygame.mouse.get_pos())
+        else:
+            mouse_pos = None
         event = InputEvent(
             player_id  = player_id, 
             input_data = {
                 'keyup':list(key_up),
                 'keydown':list(key_down),
-                'mouse_pos': pygame.mouse.get_pos(),
+                'mouse_pos': mouse_pos,
                 'mouse_rel': pygame.mouse.get_rel(),
                 'focused': pygame.mouse.get_focused()
                 })
