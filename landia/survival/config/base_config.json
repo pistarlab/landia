@@ -20,7 +20,15 @@
         },
         "foodcollect": {
             "class": "FoodCollectController",
-            "config": {}
+            "config": {
+                "check_freq":10,
+                "num_food":9,
+                "num_monsters":1,
+                "monster_auto_respawn":false,
+                "disabled_actions":["jump"],
+                "die_reward":-20,
+                "consume_reward": 1
+            }
         },
         "objcollision": {
             "class": "ObjectCollisionController",
@@ -32,11 +40,25 @@
         },
         "infect1": {
             "class": "InfectionController",
-            "config": {}
+            "config": {
+                "round_length":100,
+                "reset_delay":10,
+                "disabled_actions": ["jump", "grab", "craft", "drop","push"]
+            }
         },
         "ctf": {
             "class": "CTFController",
-            "config": {}
+            "config": {
+                "round_length":200,
+                "min_team_size":2,
+                "bot_config_id":"monster1",
+                "disabled_actions":["jump", "grab", "craft", "drop", "push"],
+                "max_score":3,
+                "reward_capture_flag":10,
+                "reward_get_flag":1,
+                "reward_save_flag":1,
+                "reward_win_game":10
+            }
         }
     },
     "tag_list": [

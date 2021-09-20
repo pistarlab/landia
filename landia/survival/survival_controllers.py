@@ -111,12 +111,12 @@ class FoodCollectController(StateController):
         self.game_start_tick = 0
         self.last_check = 0
         self.check_freq = self.config.get("check_freq", 10) * self.content.step_duration()
-        self.needed_food = self.config.get("needed_food", 4)
+        self.num_food = self.config.get("num_food", 4)
         self.num_monsters = self.config.get("num_monsters", 1)
-        self.monster_respawn_in_round = self.config.get("monster_respawn_in_round",True)
+        self.monster_auto_respawn = self.config.get("monster_auto_respawn",True)
         self.disabled_actions = self.config.get("disabled_actions", [ "jump"])
         self.die_reward = self.config.get("die_reward", -20)
-        self.collect_reward = self.config.get("collect_reward", 1)
+        self.consume_reward = self.config.get("consume_reward", 1)
 
     def get_objects(self):
         objs = []
@@ -135,27 +135,20 @@ class FoodCollectController(StateController):
 
     def add_player_object(self, obj: PhysicalObject):
         obj.add_trigger("collision_with", "collect", self.collision_with_trigger)
+        obj.add_trigger("consume_food", "collect", self.consume_trigger)
         obj.add_trigger("die", "collect", self.die_trigger)
         obj.disabled_actions = self.disabled_actions
         self.actor_obj_ids.add(obj.get_id())
 
-    def collected_trigger(self, obj: PhysicalObject, actor_obj: PhysicalObject):
-        """
-        if food grabbed reward
-        """
-        actor_obj.add_reward(self.collect_reward)
-        self.food_ids.discard(obj.get_id())
+    def consume_trigger(self, actor_obj: PhysicalObject, food_obj: PhysicalObject):
+        actor_obj.add_reward(self.consume_reward)
+        self.food_ids.discard(food_obj.get_id())
         return True
 
     def collision_with_trigger(self, obj: PhysicalObject, obj2: PhysicalObject):
         if obj2.get_id() not in self.food_ids:
             return True
-        obj.add_reward(self.collect_reward)
-
-        gamectx.remove_object(obj2)
         obj.consume_food(obj2)
-        self.food_ids.discard(obj2.get_id())
-        gamectx.remove_object(obj2)
         return True
 
     def die_trigger(self, obj):
@@ -168,7 +161,6 @@ class FoodCollectController(StateController):
             food: Food = self.content.create_object_from_config_id("apple1")
             food.spawn(loc)
             self.food_ids.add(food.get_id())
-            food.add_trigger("receive_grab", "collect", self.collected_trigger)
 
     def spawn_monsters(self):
         all_monsters = gamectx.object_manager.get_objects_by_config_id("monster1")
@@ -194,7 +186,6 @@ class FoodCollectController(StateController):
         self.actor_obj_ids = set()
         objs: List[Food] = []
         for obj in gamectx.object_manager.get_objects_by_config_id("apple1"):
-            obj.add_trigger("receive_grab", "collect", self.collected_trigger)
             self.food_ids.add(obj.get_id())
             objs.append(obj)
 
@@ -203,9 +194,9 @@ class FoodCollectController(StateController):
     def update(self):
         time_since = clock.get_ticks() - self.last_check
         if time_since > self.check_freq:
-            if self.monster_respawn_in_round:
+            if self.monster_auto_respawn:
                 self.spawn_monsters()
-            if len(self.food_ids) < self.needed_food:
+            if len(self.food_ids) < self.num_food:
                 self.spawn_food()
 
             self.last_check = clock.get_ticks()
@@ -370,7 +361,7 @@ class InfectionController(StateController):
         self.playing_tag = "playinginfection"
         self.tags_used = {self.infected_tag, self.playing_tag}
         self.game_over = False
-        self.disabled_actions = self.config.get("disabled_actions", ["jump", "grab", "craft", "drop"])
+        self.disabled_actions = self.config.get("disabled_actions", ["jump", "grab", "craft", "drop","push"])
 
     def get_objects(self):
         objs = []
@@ -591,12 +582,17 @@ class CTFController(StateController):
         self.min_team_size = self.config.get("min_team_size", 2)
         self.bot_config_id = self.config.get("bot_config_id", "monster1")
         self.disabled_actions = self.config.get(
-            "disabled_actions", ["jump", "grab", "craft", "drop"]
+            "disabled_actions", ["jump", "grab", "craft", "drop", "push"]
         )
+        self.reward_capture_flag = self.config.get("reward_capture_flag", 10)
+        self.reward_get_flag = self.config.get("reward_get_flag", 1)
+        self.reward_save_flag = self.config.get("reward_save_flag", 1)
+        self.reward_win_game = self.config.get("reward_win_game", 10)
+        self.reward_die = self.config.get("reward_die", -2)
 
         self.init_flag_zones()
         self.assign_spawn_points()
-        self.player_rewards = {}
+        self.obj_rewards = {}
         self.max_score = self.config.get("max_score", 3)
 
     def init_flag_zones(self):
@@ -607,9 +603,9 @@ class CTFController(StateController):
             zone.model_id = f"{team.color}_flag_zone"
             team.flag_zone_id = zone.get_id()
 
-    def update_player_reward(self, obj_id, reward):
-        reward = self.player_rewards.get(obj_id, 0) + reward
-        self.player_rewards[obj_id] = reward
+    def update_obj_reward(self, obj_id, reward):
+        reward = self.obj_rewards.get(obj_id, 0) + reward
+        self.obj_rewards[obj_id] = reward
 
     def assign_spawn_points(self):
         spawn_points = gamectx.object_manager.get_objects_by_config_id("spawn_point")
@@ -856,6 +852,10 @@ class CTFController(StateController):
         flag, flag_team = self.remove_flag_from_player_obj(obj)
         if flag is not None:
             flag.spawn(obj.get_position())
+        
+        obj.add_reward(self.reward_die)
+        self.update_obj_reward(obj.get_id(),self.reward_die )
+ 
         self.spawn_player_obj(obj)
         return False
 
@@ -886,16 +886,16 @@ class CTFController(StateController):
                 # Retreive team flag
                 if flag_team.flag_holder_id is None and not flag_team.flag_at_home:
                     self.reset_flag(flag_color)
-                    obj.add_reward(1)
-                    self.update_player_reward(obj.get_id(), 1)
+                    obj.add_reward(self.reward_save_flag)
+                    self.update_obj_reward(obj.get_id(), self.reward_save_flag)
                 return True
 
             else:
                 # Get Opponent's flag
                 obj.get_inventory().add(obj2)
                 obj.add_tag("hasflag")
-                obj.add_reward(1)
-                self.update_player_reward(obj.get_id(), 1)
+                obj.add_reward(self.reward_get_flag)
+                self.update_obj_reward(obj.get_id(), self.reward_get_flag)
                 obj.add_effect_by_id(f"has_{flag_team.color}_flag")
                 flag_team.flag_holder_id = obj.get_id()
                 flag_team.flag_at_home = False
@@ -908,11 +908,11 @@ class CTFController(StateController):
 
                 if flag is not None:
                     # Capture Flag
-                    obj.add_reward(10)
-                    self.update_player_reward(obj.get_id(), 10)
+                    obj.add_reward(self.reward_capture_flag)
+                    self.update_obj_reward(obj.get_id(), 10)
                     obj_team = self.get_team(obj)
                     obj_team.score += 1
-                    if obj_team.score >= self.max_score:
+                    if self.max_score > 0 and obj_team.score >= self.max_score:
                         self.game_over = True
                         obj_team.wins += 1
                     else:
@@ -930,17 +930,31 @@ class CTFController(StateController):
 
         if self.game_over:
             if self.reset_time is None:
+                winning_teams = []
+                best_score = max([team.score for team in self.teams.values()])
                 for team in self.teams.values():
+                    if team.score == best_score:
+                        winning_teams.append(team)
+
+                wteam = None
+                if len(winning_teams) == 1:
+                    wteam = winning_teams[0]
+
+                for team in self.teams.values():
+                    is_winner = (wteam is not None and team.color == wteam.color)
                     for oid in team.team_ids:
                         o: AnimateObject = gamectx.get_object_by_id(oid)
-                        if team.score < self.max_score:
-                            o.add_reward(-2)
-                            self.update_player_reward(oid, -2)
                         p = o.get_player()
+                        pmessage = "Game Over"
+                        if is_winner:
+                            o.add_reward(self.reward_win_game)
+                            self.update_obj_reward(oid,self.reward_win_game )
+                            pmessage = "Game Over: Your team Won!"
+                        elif wteam is not None:
+                            pmessage = "Game Over: Your team Lost."
                         if p is not None:
-                            self.content.message_player(
-                                p, "Game Over", 10, clear_messages=True
-                            )
+                            self.content.message_player( p, pmessage, 10, clear_messages=True)
+
                 self.reset_time = clock.get_ticks() + self.reset_delay
             if clock.get_ticks() > self.reset_time:
                 self.reset_time = None
@@ -951,7 +965,7 @@ class CTFController(StateController):
         return max(0, (self.game_start_tick + self.ticks_per_round) - clock.get_ticks())
 
     def get_player_reward(self, obj_id):
-        return self.player_rewards.get(obj_id, 0)
+        return self.obj_rewards.get(obj_id, 0)
 
     def get_player_object_hud_info(self, obj):
         oteam = self.get_team(obj)

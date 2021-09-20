@@ -13,7 +13,12 @@
     "controllers": {
         "infect1": {
             "class": "InfectionController",
-            "config": {}
+            "config": {
+                "round_length":100,
+                "reset_delay":10,
+                "disabled_actions": ["jump", "grab", "craft", "drop","push"]
+
+            }
         }
     },
     "objects": {

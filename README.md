@@ -36,7 +36,9 @@ Capture the flag
 - Crafting System
 - Reasonable performance and low memory footprint with plenty of room for future improvements.
 
+
 ## Known Issues
+- Currently game play is strictly grid based game and all interactions and movements are restricted to the tile coordinates.  This was intended to reduce the state space for reinforcement learning, howver this take some of the fun away for human players.  Future versions will not have this limitation.
 - Limited number of objects
 - Network play is laggy and does not scale to more than a few remoe users.
 - Incomplete documentation and testing
@@ -188,9 +190,57 @@ Files within this folder can override any the default configuration:
 ### Using custom configurations
 You can create your own configuration by specifying a configuration file. This configuration will override values within the [landia/survival/config/base_config.json](landia/survival/config/base_config.json)
 
-Example: The following will look for ctf_fast_mode.json in the HOME/landia/survival/default/ folder.
+#### Example
+
+The following will look for ctf_custom.json in the HOME/landia/survival/default/ folder. For 
+
+Example File: *HOME/landia/survival/default/ctf_custom.json*
+```json
+{
+    "active_controllers": [
+        "ctf"
+    ],
+    "controllers": {
+        "ctf": {
+            "class": "CTFController",
+            "config": {
+                "round_length":400,
+                "min_team_size":3,
+                "bot_config_id":"monster1",
+                "disabled_actions":["jump", "grab", "craft", "drop", "push"],
+                "max_score":0,
+                "reward_capture_flag":10,
+                "reward_get_flag":2,
+                "reward_save_flag":1
+            }
+        }
+    },
+    "maps": {
+        "main": {
+            "static_layers": [
+                "ctf_map_2.txt"
+            ]   
+        }
+    },
+    "objects": {
+        "human1": {
+            "config": {
+                "energy_decay": 0,
+                "walk_speed": 1.4
+            }
+        },
+        "monster1": {
+            "config": {
+                "walk_speed": 0.3
+            }
+        }
+    }
+}
 ```
-landia --config_filename=ctf_fast_mode.json
+
+Run Command
+```
+landia --config_filename=ctf_custom.json
 ```
 
 ### Maps
@@ -285,22 +335,20 @@ for i in range(0,max_steps):
 
 ## Development
 
-Landia's code is flexible but may be confusing at first. The code base evolved into it's current state and could really benefit from a refactoring with better naming. 
-- The code base is divided into two parts two allow support for future content under the same framework. 
+Landia's codebase separates the core framework from the game content which stores game specific logic. (NOTE: Would benefit from a refactoring)
 
-#### Overview
-- Entrypoints [Human play](landia/runner.py), [RL Environment](landia/env.py) 
-- Core Framework: in root of [landia](landia/)
+- Core Framework [landia](landia/):
+    - Entrypoints [Human play](landia/runner.py), [RL Environment](landia/env.py) 
     - This is the core framework code which multiple games could share. It handles things like the primary game loop, rendering, and client/server communication.
-    - Main Context Object and (Human) Game loop are handled in [landia/game.py](landia/game.py).
-- Assets: [landia/survival](landia/assets/)
-    - Sprites, Sounds, and other shared media
-- Game Content Types (currently only one type available)
+    - Main Context Object and (Human) Game loop are handled in [landia/game.py](landia/game.py)
+- Game Content: (currently only one type available)
     - Survival Game:
         - Root: [landia/survival](landia/survival/)
         - Configuration: [landia/survival/config](landia/survival/config)
         - Core content file: [survival_content](landia/surival/survival_content.py). This is where most of the game is wired together.
         - [State Controllers](landia/surival/survival_controllers.py) are the are used to control game state. This is were the rules for Forager, Infection, Tag and Capture the flag are defined        
+- Assets: [landia/survival](landia/assets/)
+    - Sprites, Sounds, and other shared media
 
 ## Acknowledgments
 

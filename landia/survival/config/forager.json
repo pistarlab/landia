@@ -7,8 +7,13 @@
         "foodcollect": {
             "class": "FoodCollectController",
             "config": {
+                "check_freq":10,
+                "num_food":4,
                 "num_monsters":1,
-                "monster_auto_respawn":false
+                "monster_auto_respawn":false,
+                "disabled_actions":["jump"],
+                "die_reward":-20,
+                "consume_reward": 1
             }
         }
     },
@@ -23,7 +28,7 @@
     "objects": {
         "human1": {
             "config": {
-                "energy_decay": 4,
+                "energy_decay": 2,
                 "energy_decay_period": 1,
                 "low_energy_health_penalty": 4,
                 "walk_speed": 1.4
@@ -31,7 +36,7 @@
         },
         "monster1": {
             "config": {
-                "walk_speed": 0.5
+                "walk_speed": 0.3
             }
         }
     }

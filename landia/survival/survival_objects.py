@@ -140,7 +140,6 @@ class PhysicalObject(GObject):
         self._l_sounds = None
         self.info_label = None
         
-
         self.default_action_type = self.config.get("default_action_type", ACTION_IDLE)
         self._action: Action = None
         self._action_queue = Queue()
@@ -937,6 +936,7 @@ class AnimateObject(PhysicalObject):
         self.play_sound("eat")
         # ticks_in_action = self._l_content.step_duration()/0.5
         self.queue_action(Action(ACTION_EAT, ticks=0, step_size=0))
+        gamectx.remove_object(food_obj)
 
     @invoke_triggers
     def walk(self, direction, angle_update):
@@ -1080,6 +1080,7 @@ class AnimateObject(PhysicalObject):
         elif selected_obj.type == "food":
             self.consume_food(selected_obj)
             self.get_inventory().remove_selected()
+            
 
     @invoke_triggers
     def unarmed_attack(self):

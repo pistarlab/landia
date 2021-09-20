@@ -2,7 +2,21 @@
     "active_controllers": [
         "ctf"
     ],
-
+    "controllers": {
+        "ctf": {
+            "class": "CTFController",
+            "config": {
+                "round_length":200,
+                "min_team_size":2,
+                "bot_config_id":"monster1",
+                "disabled_actions":["jump", "grab", "craft", "drop", "push"],
+                "max_score":3,
+                "reward_capture_flag":10,
+                "reward_get_flag":1,
+                "reward_save_flag":1
+            }
+        }
+    },
     "maps": {
         "main": {
             "static_layers": [
